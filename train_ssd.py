@@ -98,10 +98,10 @@ def train(cfg, args):
             tic = time.time()
 
         if iteration != 0 and (iteration + 1) % args.save_step == 0:
-            model_path = os.path.join(cfg.OUTPUT_DIR, "ssd_vgg_iteration_{:06d}.pth".format(iteration + 1))
+            model_path = os.path.join(cfg.OUTPUT_DIR, "ssd{}_vgg_iteration_{:06d}.pth".format(cfg.INPUT.IMAGE_SIZE, iteration + 1))
             model.save(model_path)
             logging.info("Saved checkpoint to {}".format(model_path))
-    model_path = os.path.join(cfg.OUTPUT_DIR, "ssd_vgg_final.pth")
+    model_path = os.path.join(cfg.OUTPUT_DIR, "ssd{}_vgg_final.pth".format(cfg.INPUT.IMAGE_SIZE))
     model.save(model_path)
     logging.info("Saved checkpoint to {}".format(model_path))
     # compute training time
