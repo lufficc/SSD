@@ -4,6 +4,7 @@ import os
 import time
 import torch
 import torch.distributed as dist
+from torch.nn.parallel import DistributedDataParallel
 
 from ssd.utils import distributed_util
 
@@ -31,6 +32,14 @@ def reduce_loss_dict(loss_dict):
             all_losses /= world_size
         reduced_losses = {k: v for k, v in zip(loss_names, all_losses)}
     return reduced_losses
+
+
+def _save_model(logger, model, model_path):
+    vgg_model = model
+    if isinstance(model, DistributedDataParallel):
+        vgg_model = model.module
+    vgg_model.save(model_path)
+    logger.info("Saved checkpoint to {}".format(model_path))
 
 
 def do_train(cfg, model,
@@ -97,13 +106,11 @@ def do_train(cfg, model,
 
         if save_to_disk and iteration % args.save_step == 0:
             model_path = os.path.join(cfg.OUTPUT_DIR, "ssd{}_vgg_iteration_{:06d}.pth".format(cfg.INPUT.IMAGE_SIZE, iteration))
-            model.save(model_path)
-            logger.info("Saved checkpoint to {}".format(model_path))
+            _save_model(logger, model, model_path)
 
     if save_to_disk:
         model_path = os.path.join(cfg.OUTPUT_DIR, "ssd{}_vgg_final.pth".format(cfg.INPUT.IMAGE_SIZE))
-        model.save(model_path)
-        logger.info("Saved checkpoint to {}".format(model_path))
+        _save_model(logger, model, model_path)
     # compute training time
     total_training_time = int(time.time() - start_training_time)
     total_time_str = str(datetime.timedelta(seconds=total_training_time))
