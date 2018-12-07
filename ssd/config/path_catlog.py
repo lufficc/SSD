@@ -28,6 +28,14 @@ class DatasetCatalog:
             "data_dir": "VOC2012",
             "split": "test"
         },
+        'coco_2014_valminusminival': {
+            "data_dir": "val2014",
+            "ann_file": "annotations/instances_valminusminival2014.json"
+        },
+        'coco_2014_minival': {
+            "data_dir": "val2014",
+            "ann_file": "annotations/instances_minival2014.json"
+        },
     }
 
     @staticmethod
@@ -43,5 +51,16 @@ class DatasetCatalog:
                 split=attrs["split"],
             )
             return dict(factory="VOCDataset", args=args)
+        elif "coco" in name:
+            coco_root = DatasetCatalog.DATA_DIR
+            if 'COCO_ROOT' in os.environ:
+                coco_root = os.environ['COCO_ROOT']
+
+            attrs = DatasetCatalog.DATASETS[name]
+            args = dict(
+                data_dir=os.path.join(coco_root, attrs["data_dir"]),
+                ann_file=os.path.join(coco_root, attrs["ann_file"]),
+            )
+            return dict(factory="COCODataset", args=args)
 
         raise RuntimeError("Dataset not available: {}".format(name))

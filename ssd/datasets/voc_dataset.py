@@ -1,11 +1,11 @@
 import os
-
+import torch.utils.data
 import numpy as np
 import xml.etree.ElementTree as ET
 from PIL import Image
 
 
-class VOCDataset:
+class VOCDataset(torch.utils.data.Dataset):
     class_names = ('__background__',
                    'aeroplane', 'bicycle', 'bird', 'boat',
                    'bottle', 'bus', 'car', 'cat', 'chair',

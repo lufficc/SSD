@@ -4,16 +4,15 @@ import torch
 from tqdm import tqdm
 from ssd.config import cfg
 from ssd.datasets import build_dataset
+from ssd.datasets.evaluation import evaluate
 from ssd.modeling.predictor import Predictor
 from ssd.modeling.vgg_ssd import build_ssd_model
-from ssd.utils.eval_detection_voc import eval_detection_voc
 
 import argparse
-import numpy as np
 
 
-def do_evaluation(cfg, model, test_dataset, output_dir):
-    class_names = test_dataset.class_names
+def do_evaluation(cfg, model, output_dir):
+    test_datasets = build_dataset(dataset_list=cfg.DATASETS.TEST, is_test=True)
     device = torch.device(cfg.MODEL.DEVICE)
     model.eval()
     predictor = Predictor(cfg=cfg,
@@ -23,61 +22,31 @@ def do_evaluation(cfg, model, test_dataset, output_dir):
                           device=device)
 
     cpu_device = torch.device("cpu")
-
-    pred_boxes_list = []
-    pred_labels_list = []
-    pred_scores_list = []
-    gt_boxes_list = []
-    gt_labels_list = []
-    gt_difficults = []
-    for i in tqdm(range(len(test_dataset))):
-        image_id, annotation = test_dataset.get_annotation(i)
-        gt_boxes, gt_labels, is_difficult = annotation
-        gt_boxes_list.append(gt_boxes)
-        gt_labels_list.append(gt_labels)
-        gt_difficults.append(is_difficult.astype(np.bool))
-
-        image = test_dataset.get_image(i)
-        output = predictor.predict(image)
-        boxes, labels, scores = [o.to(cpu_device).numpy() for o in output]
-
-        pred_boxes_list.append(boxes)
-        pred_labels_list.append(labels)
-        pred_scores_list.append(scores)
-
-    result = eval_detection_voc(pred_bboxes=pred_boxes_list,
-                                pred_labels=pred_labels_list,
-                                pred_scores=pred_scores_list,
-                                gt_bboxes=gt_boxes_list,
-                                gt_labels=gt_labels_list,
-                                gt_difficults=gt_difficults,
-                                iou_thresh=0.5,
-                                use_07_metric=True)
-
-    result_str = "mAP: {:.4f}\n".format(result["map"])
-    for i, ap in enumerate(result["ap"]):
-        if i == 0:  # skip background
-            continue
-        result_str += "{:<16}: {:.4f}\n".format(class_names[i], ap)
-    print(result_str)
-    prediction_path = os.path.join(output_dir, "result.txt")
-    with open(prediction_path, "w") as f:
-        f.write(result_str)
+    for dataset_name, test_dataset in zip(cfg.DATASETS.TEST, test_datasets):
+        print("Test dataset {} size: {}".format(dataset_name, len(test_dataset)))
+        predictions = []
+        for i in tqdm(range(len(test_dataset))):
+            image = test_dataset.get_image(i)
+            output = predictor.predict(image)
+            boxes, labels, scores = [o.to(cpu_device).numpy() for o in output]
+            predictions.append((boxes, labels, scores))
+        final_output_dir = os.path.join(output_dir, dataset_name)
+        if not os.path.exists(final_output_dir):
+            os.makedirs(final_output_dir)
+        torch.save(predictions, os.path.join(final_output_dir, 'predictions.pth'))
+        evaluate(dataset=test_dataset, predictions=predictions, output_dir=final_output_dir)
 
 
 def evaluation(cfg, weights_file, output_dir):
     if not os.path.exists(output_dir):
         os.makedirs(output_dir)
 
-    test_dataset = build_dataset(dataset_list=cfg.DATASETS.TEST)
-    print("Test dataset size: {}".format(len(test_dataset)))
-
     device = torch.device(cfg.MODEL.DEVICE)
     model = build_ssd_model(cfg, is_test=True)
     model.load(weights_file)
     print('Loaded weights from {}.'.format(weights_file))
     model.to(device)
-    do_evaluation(cfg, model, test_dataset, output_dir)
+    do_evaluation(cfg, model, output_dir)
 
 
 def main():

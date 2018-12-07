@@ -5,9 +5,9 @@ import torch
 from PIL import Image
 from tqdm import tqdm
 from ssd.config import cfg
+from ssd.datasets import COCODataset, VOCDataset
 from ssd.modeling.predictor import Predictor
 from ssd.modeling.vgg_ssd import build_ssd_model
-from ssd.datasets.voc_dataset import VOCDataset
 import argparse
 import numpy as np
 
@@ -17,6 +17,8 @@ from ssd.utils.viz import draw_bounding_boxes
 def run_demo(cfg, weights_file, iou_threshold, score_threshold, images_dir, output_dir, dataset_type):
     if dataset_type == "voc":
         class_names = VOCDataset.class_names
+    elif dataset_type == 'coco':
+        class_names = COCODataset.class_names
     else:
         raise NotImplementedError('Not implemented now.')
 

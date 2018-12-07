@@ -156,9 +156,7 @@ def main():
 
     if not args.skip_test:
         logging.info('Start evaluating...')
-        test_dataset = build_dataset(dataset_list=cfg.DATASETS.TEST)
-        print("Test dataset size: {}".format(len(test_dataset)))
-        do_evaluation(cfg, model, test_dataset, cfg.OUTPUT_DIR)
+        do_evaluation(cfg, model, cfg.OUTPUT_DIR)
 
 
 if __name__ == '__main__':
