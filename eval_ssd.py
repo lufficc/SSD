@@ -1,52 +1,27 @@
+import argparse
+import logging
 import os
 
 import torch
-from tqdm import tqdm
+import torch.utils.data
+
 from ssd.config import cfg
-from ssd.datasets import build_dataset
-from ssd.datasets.evaluation import evaluate
-from ssd.modeling.predictor import Predictor
+from ssd.engine.inference import do_evaluation
 from ssd.modeling.vgg_ssd import build_ssd_model
-
-import argparse
-
-
-def do_evaluation(cfg, model, output_dir):
-    test_datasets = build_dataset(dataset_list=cfg.DATASETS.TEST, is_test=True)
-    device = torch.device(cfg.MODEL.DEVICE)
-    model.eval()
-    predictor = Predictor(cfg=cfg,
-                          model=model,
-                          iou_threshold=cfg.TEST.NMS_THRESHOLD,
-                          score_threshold=cfg.TEST.CONFIDENCE_THRESHOLD,
-                          device=device)
-
-    cpu_device = torch.device("cpu")
-    for dataset_name, test_dataset in zip(cfg.DATASETS.TEST, test_datasets):
-        print("Test dataset {} size: {}".format(dataset_name, len(test_dataset)))
-        predictions = []
-        for i in tqdm(range(len(test_dataset))):
-            image = test_dataset.get_image(i)
-            output = predictor.predict(image)
-            boxes, labels, scores = [o.to(cpu_device).numpy() for o in output]
-            predictions.append((boxes, labels, scores))
-        final_output_dir = os.path.join(output_dir, dataset_name)
-        if not os.path.exists(final_output_dir):
-            os.makedirs(final_output_dir)
-        torch.save(predictions, os.path.join(final_output_dir, 'predictions.pth'))
-        evaluate(dataset=test_dataset, predictions=predictions, output_dir=final_output_dir)
+from ssd.utils import distributed_util
+from ssd.utils.logger import setup_logger
 
 
-def evaluation(cfg, weights_file, output_dir):
+def evaluation(cfg, weights_file, output_dir, distributed):
     if not os.path.exists(output_dir):
         os.makedirs(output_dir)
-
     device = torch.device(cfg.MODEL.DEVICE)
     model = build_ssd_model(cfg, is_test=True)
     model.load(weights_file)
-    print('Loaded weights from {}.'.format(weights_file))
+    logger = logging.getLogger("SSD.inference")
+    logger.info('Loaded weights from {}.'.format(weights_file))
     model.to(device)
-    do_evaluation(cfg, model, output_dir)
+    do_evaluation(cfg, model, output_dir, distributed)
 
 
 def main():
@@ -58,6 +33,7 @@ def main():
         help="path to config file",
         type=str,
     )
+    parser.add_argument("--local_rank", type=int, default=0)
     parser.add_argument("--weights", type=str, help="Trained weights.")
     parser.add_argument("--output_dir", default="eval_results", type=str, help="The directory to store evaluation results.")
 
@@ -68,18 +44,28 @@ def main():
         nargs=argparse.REMAINDER,
     )
     args = parser.parse_args()
-    print(args)
+
+    num_gpus = int(os.environ["WORLD_SIZE"]) if "WORLD_SIZE" in os.environ else 1
+    distributed = num_gpus > 1
+
+    if distributed:
+        torch.cuda.set_device(args.local_rank)
+        torch.distributed.init_process_group(backend="nccl", init_method="env://")
 
     cfg.merge_from_file(args.config_file)
     cfg.merge_from_list(args.opts)
     cfg.freeze()
 
-    print("Loaded configuration file {}".format(args.config_file))
+    logger = setup_logger("SSD", distributed_util.get_rank())
+    logger.info("Using {} GPUs".format(num_gpus))
+    logger.info(args)
+
+    logger.info("Loaded configuration file {}".format(args.config_file))
     with open(args.config_file, "r") as cf:
         config_str = "\n" + cf.read()
-        print(config_str)
-    print("Running with config:\n{}".format(cfg))
-    evaluation(cfg, weights_file=args.weights, output_dir=args.output_dir)
+        logger.info(config_str)
+    logger.info("Running with config:\n{}".format(cfg))
+    evaluation(cfg, weights_file=args.weights, output_dir=args.output_dir, distributed=distributed)
 
 
 if __name__ == '__main__':

@@ -1,4 +1,4 @@
-from ssd.datasets import VOCDataset, COCODataset
+from ssd.data.datasets import VOCDataset, COCODataset
 from .coco import coco_evaluation
 from .voc import voc_evaluation
 

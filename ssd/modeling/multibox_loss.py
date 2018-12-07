@@ -5,14 +5,14 @@ import torch
 from ssd.utils import box_utils
 
 
-class MultiboxLoss(nn.Module):
+class MultiBoxLoss(nn.Module):
     def __init__(self, iou_threshold, neg_pos_ratio):
-        """Implement SSD Multibox Loss.
+        """Implement SSD MultiBox Loss.
 
-        Basically, Multibox loss combines classification loss
+        Basically, MultiBox loss combines classification loss
          and Smooth L1 regression loss.
         """
-        super(MultiboxLoss, self).__init__()
+        super(MultiBoxLoss, self).__init__()
         self.iou_threshold = iou_threshold
         self.neg_pos_ratio = neg_pos_ratio
 

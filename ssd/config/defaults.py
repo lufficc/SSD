@@ -55,6 +55,8 @@ _C.SOLVER.BATCH_SIZE = 32
 _C.SOLVER.LR = 1e-3
 _C.SOLVER.MOMENTUM = 0.9
 _C.SOLVER.WEIGHT_DECAY = 5e-4
+_C.SOLVER.WARMUP_FACTOR = 1.0 / 3
+_C.SOLVER.WARMUP_ITERS = 500
 
 # ---------------------------------------------------------------------------- #
 # Specific test options

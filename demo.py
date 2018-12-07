@@ -5,7 +5,7 @@ import torch
 from PIL import Image
 from tqdm import tqdm
 from ssd.config import cfg
-from ssd.datasets import COCODataset, VOCDataset
+from ssd.data.datasets import COCODataset, VOCDataset
 from ssd.modeling.predictor import Predictor
 from ssd.modeling.vgg_ssd import build_ssd_model
 import argparse
