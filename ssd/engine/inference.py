@@ -7,6 +7,7 @@ from tqdm import tqdm
 from ssd.data.datasets import build_dataset
 from ssd.data.datasets.evaluation import evaluate
 from ssd.modeling.predictor import Predictor
+from ssd.modeling.ssd import SSD
 
 from ssd.utils import distributed_util
 
@@ -34,9 +35,14 @@ def _accumulate_predictions_from_multiple_gpus(predictions_per_gpu):
 
 
 def do_evaluation(cfg, model, output_dir, distributed):
+    if isinstance(model, torch.nn.parallel.DistributedDataParallel):
+        model = model.module
+    assert isinstance(model, SSD), 'Wrong module.'
     test_datasets = build_dataset(dataset_list=cfg.DATASETS.TEST, is_test=True)
     device = torch.device(cfg.MODEL.DEVICE)
     model.eval()
+    if not model.is_test:
+        model.is_test = True
     predictor = Predictor(cfg=cfg,
                           model=model,
                           iou_threshold=cfg.TEST.NMS_THRESHOLD,
