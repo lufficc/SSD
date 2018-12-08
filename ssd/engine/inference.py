@@ -58,10 +58,10 @@ def do_evaluation(cfg, model, output_dir, distributed):
             indices = indices[distributed_util.get_rank()::distributed_util.get_world_size()]
 
         # show progress bar only on main process.
-        display = tqdm if distributed_util.is_main_process() else iter
-        logger.info('Progress on GPU 0:')
+        progress_bar = tqdm if distributed_util.is_main_process() else iter
+        logger.info('Progress on {} 0:'.format(cfg.MODEL.DEVICE.upper()))
         predictions = {}
-        for i in display(indices):
+        for i in progress_bar(indices):
             image = test_dataset.get_image(i)
             output = predictor.predict(image)
             boxes, labels, scores = [o.to(cpu_device).numpy() for o in output]

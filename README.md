@@ -9,6 +9,7 @@ This repository implements [SSD (Single Shot MultiBox Detector)](https://arxiv.o
 - Multi-GPU training and inference
 - Modular
 - Visualization(Support Tensorboard)
+- CPU support for inference
 
 ## Installation
 ### Requirements
@@ -75,7 +76,7 @@ python train_ssd.py --config-file configs/ssd300_voc0712.yaml --vgg vgg16_reduce
 ```bash
 # for example, train SSD300 with 4 GPUs:
 export NGPUS=4
-python -m torch.distributed.launch --nproc_per_node=$NGPUS --config-file configs/ssd300_voc0712.yaml --vgg vgg16_reducedfc.pth
+python -m torch.distributed.launch --nproc_per_node=$NGPUS train_ssd.py --config-file configs/ssd300_voc0712.yaml --vgg vgg16_reducedfc.pth
 ```
 The configuration files that I provide assume that we are running on single GPU. When changing number of GPUs, hyper-parameter (lr, max_iter, ...) will also changed according to this paper: [Accurate, Large Minibatch SGD: Training ImageNet in 1 Hour](https://arxiv.org/abs/1706.02677).
 The pre-trained vgg weights can be downloaded here: https://s3.amazonaws.com/amdegroot-models/vgg16_reducedfc.pth.
