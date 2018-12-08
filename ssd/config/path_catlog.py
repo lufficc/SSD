@@ -12,6 +12,10 @@ class DatasetCatalog:
             "data_dir": "VOC2007",
             "split": "val"
         },
+        'voc_2007_trainval': {
+            "data_dir": "VOC2007",
+            "split": "trainval"
+        },
         'voc_2007_test': {
             "data_dir": "VOC2007",
             "split": "test"
@@ -24,6 +28,10 @@ class DatasetCatalog:
             "data_dir": "VOC2012",
             "split": "val"
         },
+        'voc_2012_trainval': {
+            "data_dir": "VOC2012",
+            "split": "trainval"
+        },
         'voc_2012_test': {
             "data_dir": "VOC2012",
             "split": "test"
@@ -35,6 +43,14 @@ class DatasetCatalog:
         'coco_2014_minival': {
             "data_dir": "val2014",
             "ann_file": "annotations/instances_minival2014.json"
+        },
+        'coco_2014_train': {
+            "data_dir": "train2014",
+            "ann_file": "annotations/instances_train2014.json"
+        },
+        'coco_2014_val': {
+            "data_dir": "val2014",
+            "ann_file": "annotations/instances_val2014.json"
         },
     }
 
