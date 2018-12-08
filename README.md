@@ -3,6 +3,13 @@
 
 This repository implements [SSD (Single Shot MultiBox Detector)](https://arxiv.org/abs/1512.02325). The implementation is heavily influenced by the projects [ssd.pytorch](https://github.com/amdegroot/ssd.pytorch), [pytorch-ssd](https://github.com/qfgaohao/pytorch-ssd) and [maskrcnn-benchmark](https://github.com/facebookresearch/maskrcnn-benchmark). This repository aims to be the code base for researches based on SSD.
 
+## Highlights
+- PyTorch 1.0
+- GPU/CPU NMS
+- Multi-GPU training and inference
+- Modular
+- Visualization(Support Tensorboard)
+
 ## Installation
 ### Requirements
 1. Python3
@@ -11,11 +18,75 @@ This repository implements [SSD (Single Shot MultiBox Detector)](https://arxiv.o
 1. GCC >= 4.9
 1. OpenCV
 ### Build
-```
+```bash
 # build nms
 cd ext
 python build.py build_ext develop
 ```
+
+## Train
+
+### Setting Up Datasets
+#### Pascal VOC
+For Pascal VOC dataset, make the folder structure like this:
+```
+VOC_ROOT
+|__ VOC2007
+    |_ JPEGImages
+    |_ Annotations
+    |_ ImageSets
+    |_ SegmentationClass
+|__ VOC2012
+    |_ JPEGImages
+    |_ Annotations
+    |_ ImageSets
+    |_ SegmentationClass
+|__ ...
+```
+Where `VOC_ROOT` default is `datasets` folder in current project, you can create symlinks to `datasets` or `export VOC_ROOT="/path/to/voc_root"`.
+#### COCO
+For COCO dataset, make the folder structure like this:
+```
+COCO_ROOT
+|__ annotations
+    |_ instances_valminusminival2014.json
+    |_ instances_minival2014.json
+    |_ instances_train2014.json
+    |_ instances_val2014.json
+    |_ ...
+|__ train2014
+    |_ <im-1-name>.jpg
+    |_ ...
+    |_ <im-N-name>.jpg
+|__ val2014
+    |_ <im-1-name>.jpg
+    |_ ...
+    |_ <im-N-name>.jpg
+|__ ...
+```
+Where `COCO_ROOT` default is `datasets` folder in current project, you can create symlinks to `datasets` or `export COCO_ROOT="/path/to/coco_root"`.
+
+### Single GPU training
+```bash
+# for example, train SSD300:
+python train_ssd.py --config-file configs/ssd300_voc0712.yaml --vgg vgg16_reducedfc.pth
+```
+### Multi-GPU training
+```bash
+# for example, train SSD300 with 4 GPUs:
+export NGPUS=4
+python -m torch.distributed.launch --nproc_per_node=$NGPUS --config-file configs/ssd300_voc0712.yaml --vgg vgg16_reducedfc.pth
+```
+The configuration files that I provide assume that we are running on single GPU. When changing number of GPUs, hyper-parameter (lr, max_iter, ...) will also changed according to this paper: [Accurate, Large Minibatch SGD: Training ImageNet in 1 Hour](https://arxiv.org/abs/1706.02677).
+The pre-trained vgg weights can be downloaded here: https://s3.amazonaws.com/amdegroot-models/vgg16_reducedfc.pth.
+
+## Demo
+Predicting image in a folder is simple:
+```bash
+python demo.py --config-file configs/ssd300_voc0712.yaml --weights path/to/trained/weights.pth --images_dir demo
+```
+Then the predicted images with boxes, scores and label names will saved to `demo/result` folder.
+Currently, I provide weights trained with `ssd300_voc0712.yaml` here: [ssd300_voc0712_mAP77.83.pth(100 MB)](https://github.com/lufficc/SSD/releases/download/0.1/ssd300_voc0712_mAP77.83.pth)
 
 ## Performance
 ### Origin Paper:
