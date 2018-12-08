@@ -102,7 +102,7 @@ Currently, I provide weights trained with `ssd300_voc0712.yaml` here: [ssd300_vo
 |         | VOC2007 test |
 | :-----: | :----------: |
 | SSD300* |     77.8     |
-| SSD512* |      -       |
+| SSD512* |     80.2     |
 
 ### Details:
 
@@ -140,6 +140,26 @@ tvmonitor       : 0.7554</code></pre></td>
 </tr>
 <tr>
 <td>SSD512*</td>
-<td><pre><code>-</code></pre></td>
+<td><pre><code>mAP: 0.8025
+aeroplane       : 0.8582
+bicycle         : 0.8710
+bird            : 0.8192
+boat            : 0.7410
+bottle          : 0.5894
+bus             : 0.8755
+car             : 0.8856
+cat             : 0.8926
+chair           : 0.6589
+cow             : 0.8634
+diningtable     : 0.7676
+dog             : 0.8707
+horse           : 0.8806
+motorbike       : 0.8512
+person          : 0.8316
+pottedplant     : 0.5238
+sheep           : 0.8191
+sofa            : 0.7915
+train           : 0.8735
+tvmonitor       : 0.7866</code></pre></td>
 </tr>
 </tbody></table>
