@@ -1,7 +1,6 @@
 import os
 
 import numpy as np
-from tqdm import tqdm
 
 from .eval_detection_voc import eval_detection_voc
 
@@ -16,7 +15,7 @@ def voc_evaluation(dataset, predictions, output_dir):
     gt_labels_list = []
     gt_difficults = []
 
-    for i in tqdm(range(len(dataset))):
+    for i in range(len(dataset)):
         image_id, annotation = dataset.get_annotation(i)
         gt_boxes, gt_labels, is_difficult = annotation
         gt_boxes_list.append(gt_boxes)
