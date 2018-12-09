@@ -87,7 +87,13 @@ Predicting image in a folder is simple:
 python demo.py --config-file configs/ssd300_voc0712.yaml --weights path/to/trained/weights.pth --images_dir demo
 ```
 Then the predicted images with boxes, scores and label names will saved to `demo/result` folder.
-Currently, I provide weights trained with `ssd300_voc0712.yaml` here: [ssd300_voc0712_mAP77.83.pth(100 MB)](https://github.com/lufficc/SSD/releases/download/0.1/ssd300_voc0712_mAP77.83.pth)
+
+Currently, I provide weights trained as follows:
+
+|         |    Weights   |
+| :-----: | :----------: |
+| SSD300* | [ssd300_voc0712_mAP77.83.pth(100 MB)](https://github.com/lufficc/SSD/releases/download/v1.0/ssd300_voc0712_mAP77.83.pth) |
+| SSD512* | [ssd512_voc0712_mAP80.25.pth(104 MB)](https://github.com/lufficc/SSD/releases/download/v1.0/ssd512_voc0712_mAP80.25.pth) |
 
 ## Performance
 ### Origin Paper:
