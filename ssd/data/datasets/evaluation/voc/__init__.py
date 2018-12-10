@@ -41,6 +41,7 @@ def voc_evaluation(dataset, predictions, output_dir):
             continue
         result_str += "{:<16}: {:.4f}\n".format(class_names[i], ap)
     print(result_str)
-    prediction_path = os.path.join(output_dir, "result.txt")
-    with open(prediction_path, "w") as f:
+    result_path = os.path.join(output_dir, "result.txt")
+    with open(result_path, "w") as f:
         f.write(result_str)
+    return result_str

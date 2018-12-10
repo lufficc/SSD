@@ -25,7 +25,7 @@ def evaluation(cfg, weights_file, output_dir, distributed):
 
 
 def main():
-    parser = argparse.ArgumentParser(description='SSD Evaluation on VOC Dataset.')
+    parser = argparse.ArgumentParser(description='SSD Evaluation on VOC and COCO dataset.')
     parser.add_argument(
         "--config-file",
         default="",

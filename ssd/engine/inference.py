@@ -34,6 +34,46 @@ def _accumulate_predictions_from_multiple_gpus(predictions_per_gpu):
     return predictions
 
 
+def _evaluation(cfg, dataset_name, test_dataset, predictor, distributed, output_dir):
+    """ Perform evaluating on one dataset
+    Args:
+        cfg:
+        dataset_name: dataset's name
+        test_dataset: Dataset object
+        predictor: Predictor object, used to to prediction.
+        distributed: whether distributed evaluating or not
+        output_dir: path to save prediction results
+    Returns:
+        evaluate result
+    """
+    cpu_device = torch.device("cpu")
+    logger = logging.getLogger("SSD.inference")
+    logger.info("Evaluating {} dataset({} images):".format(dataset_name, len(test_dataset)))
+    indices = list(range(len(test_dataset)))
+    if distributed:
+        indices = indices[distributed_util.get_rank()::distributed_util.get_world_size()]
+
+    # show progress bar only on main process.
+    progress_bar = tqdm if distributed_util.is_main_process() else iter
+    logger.info('Progress on {} 0:'.format(cfg.MODEL.DEVICE.upper()))
+    predictions = {}
+    for i in progress_bar(indices):
+        image = test_dataset.get_image(i)
+        output = predictor.predict(image)
+        boxes, labels, scores = [o.to(cpu_device).numpy() for o in output]
+        predictions[i] = (boxes, labels, scores)
+    distributed_util.synchronize()
+    predictions = _accumulate_predictions_from_multiple_gpus(predictions)
+    if not distributed_util.is_main_process():
+        return
+
+    final_output_dir = os.path.join(output_dir, dataset_name)
+    if not os.path.exists(final_output_dir):
+        os.makedirs(final_output_dir)
+    torch.save(predictions, os.path.join(final_output_dir, 'predictions.pth'))
+    return evaluate(dataset=test_dataset, predictions=predictions, output_dir=final_output_dir)
+
+
 def do_evaluation(cfg, model, output_dir, distributed):
     if isinstance(model, torch.nn.parallel.DistributedDataParallel):
         model = model.module
@@ -48,31 +88,9 @@ def do_evaluation(cfg, model, output_dir, distributed):
                           iou_threshold=cfg.TEST.NMS_THRESHOLD,
                           score_threshold=cfg.TEST.CONFIDENCE_THRESHOLD,
                           device=device)
-
-    cpu_device = torch.device("cpu")
+    # evaluate all test datasets.
     logger = logging.getLogger("SSD.inference")
+    logger.info('Will evaluate {} dataset(s):'.format(len(test_datasets)))
     for dataset_name, test_dataset in zip(cfg.DATASETS.TEST, test_datasets):
-        logger.info("Test dataset {} size: {}".format(dataset_name, len(test_dataset)))
-        indices = list(range(len(test_dataset)))
-        if distributed:
-            indices = indices[distributed_util.get_rank()::distributed_util.get_world_size()]
-
-        # show progress bar only on main process.
-        progress_bar = tqdm if distributed_util.is_main_process() else iter
-        logger.info('Progress on {} 0:'.format(cfg.MODEL.DEVICE.upper()))
-        predictions = {}
-        for i in progress_bar(indices):
-            image = test_dataset.get_image(i)
-            output = predictor.predict(image)
-            boxes, labels, scores = [o.to(cpu_device).numpy() for o in output]
-            predictions[i] = (boxes, labels, scores)
+        _evaluation(cfg, dataset_name, test_dataset, predictor, distributed, output_dir)
         distributed_util.synchronize()
-        predictions = _accumulate_predictions_from_multiple_gpus(predictions)
-        if not distributed_util.is_main_process():
-            return
-
-        final_output_dir = os.path.join(output_dir, dataset_name)
-        if not os.path.exists(final_output_dir):
-            os.makedirs(final_output_dir)
-        torch.save(predictions, os.path.join(final_output_dir, 'predictions.pth'))
-        evaluate(dataset=test_dataset, predictions=predictions, output_dir=final_output_dir)
