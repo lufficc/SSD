@@ -81,6 +81,20 @@ python -m torch.distributed.launch --nproc_per_node=$NGPUS train_ssd.py --config
 The configuration files that I provide assume that we are running on single GPU. When changing number of GPUs, hyper-parameter (lr, max_iter, ...) will also changed according to this paper: [Accurate, Large Minibatch SGD: Training ImageNet in 1 Hour](https://arxiv.org/abs/1706.02677).
 The pre-trained vgg weights can be downloaded here: https://s3.amazonaws.com/amdegroot-models/vgg16_reducedfc.pth.
 
+## Evaluate
+
+### Single GPU evaluating
+```bash
+# for example, evaluate SSD300:
+python eval_ssd.py --config-file configs/ssd300_voc0712.yaml --weights /path/to/trained_ssd300_weights.pth
+```
+### Multi-GPU evaluating
+```bash
+# for example, evaluate SSD300 with 4 GPUs:
+export NGPUS=4
+python -m torch.distributed.launch --nproc_per_node=$NGPUS eval_ssd.py --config-file configs/ssd300_voc0712.yaml --weights /path/to/trained_ssd300_weights.pth
+```
+
 ## Demo
 Predicting image in a folder is simple:
 ```bash
