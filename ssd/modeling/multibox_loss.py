@@ -6,14 +6,13 @@ from ssd.utils import box_utils
 
 
 class MultiBoxLoss(nn.Module):
-    def __init__(self, iou_threshold, neg_pos_ratio):
+    def __init__(self, neg_pos_ratio):
         """Implement SSD MultiBox Loss.
 
         Basically, MultiBox loss combines classification loss
          and Smooth L1 regression loss.
         """
         super(MultiBoxLoss, self).__init__()
-        self.iou_threshold = iou_threshold
         self.neg_pos_ratio = neg_pos_ratio
 
     def forward(self, confidence, predicted_locations, labels, gt_locations):

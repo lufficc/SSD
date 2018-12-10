@@ -46,7 +46,7 @@ def train(cfg, args):
     # -----------------------------------------------------------------------------
     # Criterion
     # -----------------------------------------------------------------------------
-    criterion = MultiBoxLoss(iou_threshold=cfg.MODEL.THRESHOLD, neg_pos_ratio=cfg.MODEL.NEG_POS_RATIO)
+    criterion = MultiBoxLoss(neg_pos_ratio=cfg.MODEL.NEG_POS_RATIO)
 
     # -----------------------------------------------------------------------------
     # Scheduler
