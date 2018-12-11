@@ -8,12 +8,14 @@ class PostProcessor:
                  iou_threshold,
                  score_threshold,
                  image_size,
-                 max_count=200):
+                 max_per_class=200,
+                 max_per_image=-1):
         self.confidence_threshold = score_threshold
         self.iou_threshold = iou_threshold
-        self.max_count = max_count
         self.width = image_size
         self.height = image_size
+        self.max_per_class = max_per_class
+        self.max_per_image = max_per_image
 
     def __call__(self, confidences, locations, width=None, height=None, batch_ids=None):
         """filter result using nms
@@ -61,7 +63,7 @@ class PostProcessor:
                 boxes[:, 1] *= height
                 boxes[:, 3] *= height
 
-                keep = boxes_nms(boxes, probs, self.iou_threshold, self.max_count)
+                keep = boxes_nms(boxes, probs, self.iou_threshold, self.max_per_class)
 
                 boxes = boxes[keep, :]
                 labels = torch.tensor([class_index] * keep.size(0))
@@ -73,5 +75,10 @@ class PostProcessor:
             filtered_boxes = torch.cat(filtered_boxes, 0)
             filtered_labels = torch.cat(filtered_labels, 0)
             filtered_probs = torch.cat(filtered_probs, 0)
+            if 0 < self.max_per_image < filtered_probs.size(0):
+                keep = torch.argsort(filtered_probs, dim=0, descending=True)[:self.max_per_image]
+                filtered_boxes = filtered_boxes[keep, :]
+                filtered_labels = filtered_labels[keep]
+                filtered_probs = filtered_probs[keep]
             results.append((filtered_boxes, filtered_labels, filtered_probs))
         return results

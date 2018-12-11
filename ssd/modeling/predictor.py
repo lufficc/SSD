@@ -11,7 +11,9 @@ class Predictor:
         self.transform = PredictionTransform(cfg.INPUT.IMAGE_SIZE, cfg.INPUT.PIXEL_MEAN)
         self.post_processor = PostProcessor(iou_threshold=iou_threshold,
                                             score_threshold=score_threshold,
-                                            image_size=cfg.INPUT.IMAGE_SIZE)
+                                            image_size=cfg.INPUT.IMAGE_SIZE,
+                                            max_per_class=cfg.TEST.MAX_PER_CLASS,
+                                            max_per_image=cfg.TEST.MAX_PER_IMAGE)
         self.device = device
         self.model.eval()
 

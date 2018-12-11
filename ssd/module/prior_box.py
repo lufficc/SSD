@@ -17,7 +17,7 @@ class PriorBox(nn.Module):
         self.aspect_ratios = prior_config.ASPECT_RATIOS
         self.clip = prior_config.CLIP
 
-    def forward(self, ):
+    def forward(self):
         """Generate SSD Prior Boxes.
             It returns the center, height and width of the priors. The values are relative to the image size
             Returns:
