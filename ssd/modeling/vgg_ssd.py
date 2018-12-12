@@ -62,7 +62,7 @@ def add_header(vgg, extra_layers, boxes_per_location, num_classes):
     return regression_headers, classification_headers
 
 
-def build_ssd_model(cfg, is_test=False):
+def build_ssd_model(cfg):
     num_classes = cfg.MODEL.NUM_CLASSES
     size = cfg.INPUT.IMAGE_SIZE
     vgg_base = {
@@ -92,5 +92,4 @@ def build_ssd_model(cfg, is_test=False):
                vgg=vgg,
                extras=extras,
                classification_headers=classification_headers,
-               regression_headers=regression_headers,
-               is_test=is_test)
+               regression_headers=regression_headers)

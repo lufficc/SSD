@@ -23,7 +23,7 @@ def run_demo(cfg, weights_file, iou_threshold, score_threshold, images_dir, outp
         raise NotImplementedError('Not implemented now.')
 
     device = torch.device(cfg.MODEL.DEVICE)
-    model = build_ssd_model(cfg, is_test=True)
+    model = build_ssd_model(cfg)
     model.load(weights_file)
     print('Loaded weights from {}.'.format(weights_file))
     model = model.to(device)

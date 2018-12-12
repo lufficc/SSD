@@ -81,8 +81,6 @@ def do_evaluation(cfg, model, output_dir, distributed):
     test_datasets = build_dataset(dataset_list=cfg.DATASETS.TEST, is_test=True)
     device = torch.device(cfg.MODEL.DEVICE)
     model.eval()
-    if not model.is_test:
-        model.is_test = True
     predictor = Predictor(cfg=cfg,
                           model=model,
                           iou_threshold=cfg.TEST.NMS_THRESHOLD,

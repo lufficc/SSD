@@ -16,7 +16,7 @@ def evaluation(cfg, weights_file, output_dir, distributed):
     if not os.path.exists(output_dir):
         os.makedirs(output_dir)
     device = torch.device(cfg.MODEL.DEVICE)
-    model = build_ssd_model(cfg, is_test=True)
+    model = build_ssd_model(cfg)
     model.load(weights_file)
     logger = logging.getLogger("SSD.inference")
     logger.info('Loaded weights from {}.'.format(weights_file))

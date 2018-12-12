@@ -13,8 +13,7 @@ class SSD(nn.Module):
                  vgg: nn.ModuleList,
                  extras: nn.ModuleList,
                  classification_headers: nn.ModuleList,
-                 regression_headers: nn.ModuleList,
-                 is_test=False):
+                 regression_headers: nn.ModuleList):
         """Compose a SSD model using the given components.
         """
         super(SSD, self).__init__()
@@ -25,7 +24,6 @@ class SSD(nn.Module):
         self.classification_headers = classification_headers
         self.regression_headers = regression_headers
         self.l2_norm = L2Norm(512, scale=20)
-        self.is_test = is_test
         self.priors = None
         self.reset_parameters()
 
@@ -69,7 +67,7 @@ class SSD(nn.Module):
         confidences = confidences.view(confidences.size(0), -1, self.num_classes)
         locations = locations.view(locations.size(0), -1, 4)
 
-        if self.is_test:
+        if not self.training:
             if self.priors is None:
                 self.priors = PriorBox(self.cfg)().to(locations.device)
             confidences = F.softmax(confidences, dim=2)
