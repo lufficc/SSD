@@ -19,9 +19,37 @@ This repository implements [SSD (Single Shot MultiBox Detector)](https://arxiv.o
 1. yacs
 1. GCC >= 4.9
 1. OpenCV
+
+### Step-by-step installation
+```bash
+# First, make sure that your conda is setup properly with the right environment
+# for that, check that `which conda`, `which pip` and `which python` points to the
+# right path. From a clean conda env, this is what you need to do.
+# But if you don't use conda, it's OK. Just pip install necessary packages.
+
+conda create --name SSD
+source activate SSD
+
+# follow PyTorch installation in https://pytorch.org/get-started/locally/
+conda install pytorch torchvision -c pytorch
+
+pip install yacs tqdm
+conda install opencv
+# Optional packages
+# If you want visualize loss curve. Default is enabled. Disable by using --use_tensorboard 0 when training.
+pip install tensorboardX
+# If you train coco dataset, must install cocoapi.
+cd ~/github
+git clone https://github.com/cocodataset/cocoapi.git
+cd cocoapi/PythonAPI
+python setup.py build_ext install
+# Finally, download the pre-trained vgg weights.
+wget https://s3.amazonaws.com/amdegroot-models/vgg16_reducedfc.pth
+```
+
 ### Build
 ```bash
-# build nms
+# build nms, this is needed when evaluating. Only training doesn't need this.
 cd ext
 python build.py build_ext develop
 ```
@@ -46,6 +74,7 @@ VOC_ROOT
 |__ ...
 ```
 Where `VOC_ROOT` default is `datasets` folder in current project, you can create symlinks to `datasets` or `export VOC_ROOT="/path/to/voc_root"`.
+
 #### COCO
 For COCO dataset, make the folder structure like this:
 ```
