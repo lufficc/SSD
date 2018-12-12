@@ -113,17 +113,19 @@ Currently, I provide weights trained as follows:
 ## Performance
 ### Origin Paper:
 
-|         | VOC2007 test |
-| :-----: | :----------: |
-| SSD300* |     77.2     |
-| SSD512* |     79.8     |
+|         | VOC2007 test | coco test-dev2015 |
+| :-----: | :----------: |   :----------:    |
+|  Train  |     07+12    |    trainval35k    |
+| SSD300* |     77.2     |      25.1         |
+| SSD512* |     79.8     |      28.8         |
 
 ### Our Implementation:
 
-|         | VOC2007 test |
-| :-----: | :----------: |
-| SSD300* |     77.8     |
-| SSD512* |     80.2     |
+|         | VOC2007 test | COCO 2014 minival |
+| :-----: | :----------: |   :----------:    |
+|  Train  |     07+12    |    trainval35k    |
+| SSD300* |     77.8     |    [Training]     |
+| SSD512* |     80.2     |    [Training]     |
 
 ### Details:
 
@@ -132,6 +134,7 @@ Currently, I provide weights trained as follows:
 <tr>
 <th></th>
 <th>VOC2007 test</th>
+<th>COCO 2014 minival</th>
 </tr>
 </thead>
 <tbody>
@@ -158,6 +161,7 @@ sheep           : 0.7685
 sofa            : 0.7926
 train           : 0.8704
 tvmonitor       : 0.7554</code></pre></td>
+<td><pre><code>-</code></pre></td>
 </tr>
 <tr>
 <td>SSD512*</td>
@@ -182,5 +186,6 @@ sheep           : 0.8191
 sofa            : 0.7915
 train           : 0.8735
 tvmonitor       : 0.7866</code></pre></td>
+<td><pre><code>-</code></pre></td>
 </tr>
 </tbody></table>
