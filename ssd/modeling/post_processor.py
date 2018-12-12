@@ -72,9 +72,16 @@ class PostProcessor:
                 filtered_boxes.append(boxes)
                 filtered_labels.append(labels)
                 filtered_probs.append(probs)
-            filtered_boxes = torch.cat(filtered_boxes, 0)
-            filtered_labels = torch.cat(filtered_labels, 0)
-            filtered_probs = torch.cat(filtered_probs, 0)
+
+            # no object detected
+            if len(filtered_boxes) == 0:
+                filtered_boxes = torch.empty(0, 4)
+                filtered_labels = torch.empty(0)
+                filtered_probs = torch.empty(0)
+            else:  # cat all result
+                filtered_boxes = torch.cat(filtered_boxes, 0)
+                filtered_labels = torch.cat(filtered_labels, 0)
+                filtered_probs = torch.cat(filtered_probs, 0)
             if 0 < self.max_per_image < filtered_probs.size(0):
                 keep = torch.argsort(filtered_probs, dim=0, descending=True)[:self.max_per_image]
                 filtered_boxes = filtered_boxes[keep, :]

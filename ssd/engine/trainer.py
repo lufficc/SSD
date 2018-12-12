@@ -6,6 +6,7 @@ import torch
 import torch.distributed as dist
 from torch.nn.parallel import DistributedDataParallel
 
+from ssd.engine.inference import do_evaluation
 from ssd.utils import distributed_util
 
 
@@ -107,6 +108,10 @@ def do_train(cfg, model,
         if save_to_disk and iteration % args.save_step == 0:
             model_path = os.path.join(cfg.OUTPUT_DIR, "ssd{}_vgg_iteration_{:06d}.pth".format(cfg.INPUT.IMAGE_SIZE, iteration))
             _save_model(logger, model, model_path)
+        # Do eval when training, to trace the mAP changes and see performance improved whether or nor
+        if args.eval_step > 0 and iteration % args.eval_step == 0 and not iteration == max_iter:
+            do_evaluation(cfg, model, cfg.OUTPUT_DIR, distributed=args.distributed)
+            model.train()
 
     if save_to_disk:
         model_path = os.path.join(cfg.OUTPUT_DIR, "ssd{}_vgg_final.pth".format(cfg.INPUT.IMAGE_SIZE))

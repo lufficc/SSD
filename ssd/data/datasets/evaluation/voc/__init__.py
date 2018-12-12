@@ -1,4 +1,6 @@
+import logging
 import os
+from datetime import datetime
 
 import numpy as np
 
@@ -34,14 +36,14 @@ def voc_evaluation(dataset, predictions, output_dir):
                                 gt_difficults=gt_difficults,
                                 iou_thresh=0.5,
                                 use_07_metric=True)
-
+    logger = logging.getLogger("SSD.inference")
     result_str = "mAP: {:.4f}\n".format(result["map"])
     for i, ap in enumerate(result["ap"]):
         if i == 0:  # skip background
             continue
         result_str += "{:<16}: {:.4f}\n".format(class_names[i], ap)
-    print(result_str)
-    result_path = os.path.join(output_dir, "result.txt")
+    logger.info(result_str)
+    result_path = os.path.join(output_dir, "result_{}.txt".format(datetime.now().strftime('%Y-%m-%d_%H-%M-%S')))
     with open(result_path, "w") as f:
         f.write(result_str)
-    return result_str
+    return result

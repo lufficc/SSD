@@ -1,4 +1,5 @@
 import json
+import logging
 import os
 
 
@@ -26,7 +27,8 @@ def coco_evaluation(dataset, predictions, output_dir):
         )
     iou_type = 'bbox'
     json_result_file = os.path.join(output_dir, iou_type + ".json")
-    print('Writing results to {}...'.format(json_result_file))
+    logger = logging.getLogger("SSD.inference")
+    logger.info('Writing results to {}...'.format(json_result_file))
     with open(json_result_file, "w") as f:
         json.dump(coco_results, f)
     from pycocotools.cocoeval import COCOeval

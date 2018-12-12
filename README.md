@@ -10,6 +10,7 @@ This repository implements [SSD (Single Shot MultiBox Detector)](https://arxiv.o
 - Modular
 - Visualization(Support Tensorboard)
 - CPU support for inference
+- Evaluating during training
 
 ## Installation
 ### Requirements

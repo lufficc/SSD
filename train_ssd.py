@@ -90,6 +90,7 @@ def main():
     parser.add_argument('--resume', default=None, type=str, help='Checkpoint state_dict file to resume training from')
     parser.add_argument('--log_step', default=50, type=int, help='Print logs every log_step')
     parser.add_argument('--save_step', default=5000, type=int, help='Save checkpoint every save_step')
+    parser.add_argument('--eval_step', default=5000, type=int, help='Evaluate dataset every eval_step, disabled when eval_step < 0')
     parser.add_argument('--use_tensorboard', default=True, type=str2bool)
     parser.add_argument(
         "--skip-test",
