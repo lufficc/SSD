@@ -19,6 +19,17 @@ This repository implements [SSD (Single Shot MultiBox Detector)](https://arxiv.o
 1. yacs
 1. GCC >= 4.9
 1. OpenCV
+
+### for conda users
+```python
+# install all dependecies
+conda env create -f environment.yml
+# start to use
+source activate SSD-pytorch`
+# leave the env
+source deactivate SSD-pytorch
+```
+
 ### Build
 ```bash
 # build nms
