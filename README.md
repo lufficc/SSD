@@ -20,7 +20,8 @@ This repository implements [SSD (Single Shot MultiBox Detector)](https://arxiv.o
 1. GCC >= 4.9
 1. OpenCV
 
-### for conda users
+### For conda users (two options)
+#### Quickly Start
 ```python
 # install all dependecies
 conda env create -f environment.yml
@@ -28,6 +29,19 @@ conda env create -f environment.yml
 source activate SSD-pytorch`
 # leave the env
 source deactivate SSD-pytorch
+```
+#### Step by step
+```python
+# Create the environment
+conda create -n SSD-pytorch python=3.6
+# start to use
+source activate SSD-pytorch
+# install packages
+conda install pytorch torchvision -c pytorch
+pip install yacs tqdm tensorboardX
+conda install opencv
+# download the VGG
+wget https://s3.amazonaws.com/amdegroot-models/vgg16_reducedfc.pth
 ```
 
 ### Build
@@ -57,6 +71,8 @@ VOC_ROOT
 |__ ...
 ```
 Where `VOC_ROOT` default is `datasets` folder in current project, you can create symlinks to `datasets` or `export VOC_ROOT="/path/to/voc_root"`.
+`ln -s path/to/VOCdevkit datasets`
+
 #### COCO
 For COCO dataset, make the folder structure like this:
 ```
