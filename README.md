@@ -35,14 +35,17 @@ conda install pytorch torchvision -c pytorch
 
 pip install yacs tqdm
 conda install opencv
+
 # Optional packages
 # If you want visualize loss curve. Default is enabled. Disable by using --use_tensorboard 0 when training.
 pip install tensorboardX
+
 # If you train coco dataset, must install cocoapi.
 cd ~/github
 git clone https://github.com/cocodataset/cocoapi.git
 cd cocoapi/PythonAPI
 python setup.py build_ext install
+
 # Finally, download the pre-trained vgg weights.
 wget https://s3.amazonaws.com/amdegroot-models/vgg16_reducedfc.pth
 ```
