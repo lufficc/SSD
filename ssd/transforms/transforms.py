@@ -242,6 +242,9 @@ class RandomSampleCrop(object):
         )
 
     def __call__(self, image, boxes=None, labels=None):
+        # guard against no boxes
+        if boxes is not None and boxes.shape[0] == 0:
+            return image, boxes, labels
         height, width, _ = image.shape
         while True:
             # randomly choose a mode

@@ -22,13 +22,19 @@ class COCODataset(torch.utils.data.Dataset):
                    'refrigerator', 'book', 'clock', 'vase', 'scissors',
                    'teddy bear', 'hair drier', 'toothbrush')
 
-    def __init__(self, data_dir, ann_file, transform=None, target_transform=None):
+    def __init__(self, data_dir, ann_file, transform=None, target_transform=None, remove_empty=False):
         from pycocotools.coco import COCO
         self.coco = COCO(ann_file)
         self.data_dir = data_dir
         self.transform = transform
         self.target_transform = target_transform
-        self.ids = list(self.coco.imgToAnns.keys())
+        self.remove_empty = remove_empty
+        if self.remove_empty:
+            # when training, images without annotations are removed.
+            self.ids = list(self.coco.imgToAnns.keys())
+        else:
+            # when testing, all images used.
+            self.ids = list(self.coco.imgs.keys())
         coco_categories = sorted(self.coco.getCatIds())
         self.coco_id_to_contiguous_id = {coco_id: i + 1 for i, coco_id in enumerate(coco_categories)}
         self.contiguous_id_to_coco_id = {v: k for k, v in self.coco_id_to_contiguous_id.items()}
@@ -60,10 +66,14 @@ class COCODataset(torch.utils.data.Dataset):
     def _get_annotation(self, image_id):
         ann_ids = self.coco.getAnnIds(imgIds=image_id)
         ann = self.coco.loadAnns(ann_ids)
-        boxes = [self._xywh2xyxy(obj["bbox"]) for obj in ann]
-        labels = [self.coco_id_to_contiguous_id[obj["category_id"]] for obj in ann]
-        boxes = np.array(boxes, np.float32).reshape((-1, 4))
-        labels = np.array(labels, np.int64).reshape((-1,))
+        # filter crowd annotations
+        ann = [obj for obj in ann if obj["iscrowd"] == 0]
+        boxes = np.array([self._xywh2xyxy(obj["bbox"]) for obj in ann], np.float32).reshape((-1, 4))
+        labels = np.array([self.coco_id_to_contiguous_id[obj["category_id"]] for obj in ann], np.int64).reshape((-1,))
+        # remove invalid boxes
+        keep = (boxes[:, 3] > boxes[:, 1]) & (boxes[:, 2] > boxes[:, 0])
+        boxes = boxes[keep]
+        labels = labels[keep]
         return boxes, labels
 
     def _xywh2xyxy(self, box):
