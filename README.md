@@ -4,6 +4,7 @@
 This repository implements [SSD (Single Shot MultiBox Detector)](https://arxiv.org/abs/1512.02325). The implementation is heavily influenced by the projects [ssd.pytorch](https://github.com/amdegroot/ssd.pytorch), [pytorch-ssd](https://github.com/qfgaohao/pytorch-ssd) and [maskrcnn-benchmark](https://github.com/facebookresearch/maskrcnn-benchmark). This repository aims to be the code base for researches based on SSD.
 
 ## Highlights
+
 - PyTorch 1.0
 - GPU/CPU NMS
 - Multi-GPU training and inference
@@ -14,6 +15,7 @@ This repository implements [SSD (Single Shot MultiBox Detector)](https://arxiv.o
 
 ## Installation
 ### Requirements
+
 1. Python3
 1. PyTorch 1.0
 1. yacs
@@ -21,6 +23,7 @@ This repository implements [SSD (Single Shot MultiBox Detector)](https://arxiv.o
 1. OpenCV
 
 ### Step-by-step installation
+
 ```bash
 # First, make sure that your conda is setup properly with the right environment
 # for that, check that `which conda`, `which pip` and `which python` points to the
@@ -51,6 +54,7 @@ wget https://s3.amazonaws.com/amdegroot-models/vgg16_reducedfc.pth
 ```
 
 ### Build
+
 ```bash
 # build nms, this is needed when evaluating. Only training doesn't need this.
 cd ext
@@ -61,6 +65,7 @@ python build.py build_ext develop
 
 ### Setting Up Datasets
 #### Pascal VOC
+
 For Pascal VOC dataset, make the folder structure like this:
 ```
 VOC_ROOT
@@ -79,6 +84,7 @@ VOC_ROOT
 Where `VOC_ROOT` default is `datasets` folder in current project, you can create symlinks to `datasets` or `export VOC_ROOT="/path/to/voc_root"`.
 
 #### COCO
+
 For COCO dataset, make the folder structure like this:
 ```
 COCO_ROOT
@@ -101,11 +107,13 @@ COCO_ROOT
 Where `COCO_ROOT` default is `datasets` folder in current project, you can create symlinks to `datasets` or `export COCO_ROOT="/path/to/coco_root"`.
 
 ### Single GPU training
+
 ```bash
 # for example, train SSD300:
 python train_ssd.py --config-file configs/ssd300_voc0712.yaml --vgg vgg16_reducedfc.pth
 ```
 ### Multi-GPU training
+
 ```bash
 # for example, train SSD300 with 4 GPUs:
 export NGPUS=4
@@ -117,11 +125,14 @@ The pre-trained vgg weights can be downloaded here: https://s3.amazonaws.com/amd
 ## Evaluate
 
 ### Single GPU evaluating
+
 ```bash
 # for example, evaluate SSD300:
 python eval_ssd.py --config-file configs/ssd300_voc0712.yaml --weights /path/to/trained_ssd300_weights.pth
 ```
+
 ### Multi-GPU evaluating
+
 ```bash
 # for example, evaluate SSD300 with 4 GPUs:
 export NGPUS=4
@@ -129,6 +140,7 @@ python -m torch.distributed.launch --nproc_per_node=$NGPUS eval_ssd.py --config-
 ```
 
 ## Demo
+
 Predicting image in a folder is simple:
 ```bash
 python demo.py --config-file configs/ssd300_voc0712.yaml --weights path/to/trained/weights.pth --images_dir demo
@@ -221,3 +233,6 @@ tvmonitor       : 0.7866</code></pre></td>
 <td><pre><code>-</code></pre></td>
 </tr>
 </tbody></table>
+
+## Troubleshooting
+If you have issues running or compiling this code, we have compiled a list of common issues in [TROUBLESHOOTING.md](TROUBLESHOOTING.md). If your issue is not present there, please feel free to open a new issue.
