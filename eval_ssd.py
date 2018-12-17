@@ -48,6 +48,10 @@ def main():
     num_gpus = int(os.environ["WORLD_SIZE"]) if "WORLD_SIZE" in os.environ else 1
     distributed = num_gpus > 1
 
+    if torch.cuda.is_available():
+        # This flag allows you to enable the inbuilt cudnn auto-tuner to
+        # find the best algorithm to use for your hardware.
+        torch.backends.cudnn.benchmark = True
     if distributed:
         torch.cuda.set_device(args.local_rank)
         torch.distributed.init_process_group(backend="nccl", init_method="env://")

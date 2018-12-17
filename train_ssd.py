@@ -109,6 +109,10 @@ def main():
     args.distributed = num_gpus > 1
     args.num_gpus = num_gpus
 
+    if torch.cuda.is_available():
+        # This flag allows you to enable the inbuilt cudnn auto-tuner to
+        # find the best algorithm to use for your hardware.
+        torch.backends.cudnn.benchmark = True
     if args.distributed:
         torch.cuda.set_device(args.local_rank)
         torch.distributed.init_process_group(backend="nccl", init_method="env://")
