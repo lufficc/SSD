@@ -71,7 +71,7 @@ def train(cfg, args):
         sampler = torch.utils.data.RandomSampler(train_dataset)
     batch_sampler = torch.utils.data.sampler.BatchSampler(sampler=sampler, batch_size=cfg.SOLVER.BATCH_SIZE, drop_last=False)
     batch_sampler = samplers.IterationBasedBatchSampler(batch_sampler, num_iterations=cfg.SOLVER.MAX_ITER // args.num_gpus)
-    train_loader = DataLoader(train_dataset, num_workers=4, batch_sampler=batch_sampler)
+    train_loader = DataLoader(train_dataset, num_workers=4, batch_sampler=batch_sampler, pin_memory=True)
 
     return do_train(cfg, model, train_loader, optimizer, scheduler, criterion, device, args)
 
