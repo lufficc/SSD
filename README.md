@@ -165,11 +165,11 @@ Currently, I provide weights trained as follows:
 
 ### Our Implementation:
 
-|         | VOC2007 test | COCO 2014 minival |
-| :-----: | :----------: |   :----------:    |
-|  Train  |     07+12    |    trainval35k    |
-| SSD300* |     77.8     |    [Training]     |
-| SSD512* |     80.2     |    [Training]     |
+|         | VOC2007 test |          COCO 2014 minival               |
+| :-----: | :----------: |   :----------------------------------:   |
+|  Train  |     07+12    |          trainval35k                     |
+| SSD300* |     77.8     |          22.9(not on test-dev2015)       |
+| SSD512* |     80.2     |          -                               |
 
 ### Details:
 
@@ -205,7 +205,18 @@ sheep           : 0.7685
 sofa            : 0.7926
 train           : 0.8704
 tvmonitor       : 0.7554</code></pre></td>
-<td><pre><code>-</code></pre></td>
+<td><pre><code>Average Precision  (AP) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.229
+Average Precision  (AP) @[ IoU=0.50      | area=   all | maxDets=100 ] = 0.388
+Average Precision  (AP) @[ IoU=0.75      | area=   all | maxDets=100 ] = 0.240
+Average Precision  (AP) @[ IoU=0.50:0.95 | area= small | maxDets=100 ] = 0.068
+Average Precision  (AP) @[ IoU=0.50:0.95 | area=medium | maxDets=100 ] = 0.244
+Average Precision  (AP) @[ IoU=0.50:0.95 | area= large | maxDets=100 ] = 0.366
+Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=  1 ] = 0.231
+Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets= 10 ] = 0.336
+Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.368
+Average Recall     (AR) @[ IoU=0.50:0.95 | area= small | maxDets=100 ] = 0.150
+Average Recall     (AR) @[ IoU=0.50:0.95 | area=medium | maxDets=100 ] = 0.404
+Average Recall     (AR) @[ IoU=0.50:0.95 | area= large | maxDets=100 ] = 0.522</code></pre></td>
 </tr>
 <tr>
 <td>SSD512*</td>
