@@ -47,7 +47,6 @@ def do_train(cfg, model,
              data_loader,
              optimizer,
              scheduler,
-             criterion,
              device,
              args):
     logger = logging.getLogger("SSD.trainer")
@@ -74,14 +73,13 @@ def do_train(cfg, model,
         labels = labels.to(device)
 
         optimizer.zero_grad()
-        confidence, locations = model(images)
-        regression_loss, classification_loss = criterion(confidence, locations, labels, boxes)
+        loss_dict = model(images, targets=(boxes, labels))
 
         # reduce losses over all GPUs for logging purposes
-        loss_dict_reduced = reduce_loss_dict({'regression_loss': regression_loss, 'classification_loss': classification_loss})
+        loss_dict_reduced = reduce_loss_dict(loss_dict)
         losses_reduced = sum(loss for loss in loss_dict_reduced.values())
 
-        loss = regression_loss + classification_loss
+        loss = sum(loss for loss in loss_dict.values())
         loss.backward()
         optimizer.step()
         trained_time += time.time() - end

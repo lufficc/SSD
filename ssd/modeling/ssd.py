@@ -3,6 +3,7 @@ import torch
 import numpy as np
 import torch.nn.functional as F
 
+from ssd.modeling.multibox_loss import MultiBoxLoss
 from ssd.module import L2Norm
 from ssd.module.prior_box import PriorBox
 from ssd.utils import box_utils
@@ -24,6 +25,7 @@ class SSD(nn.Module):
         self.classification_headers = classification_headers
         self.regression_headers = regression_headers
         self.l2_norm = L2Norm(512, scale=20)
+        self.criterion = MultiBoxLoss(neg_pos_ratio=cfg.MODEL.NEG_POS_RATIO)
         self.priors = None
         self.reset_parameters()
 
@@ -38,7 +40,7 @@ class SSD(nn.Module):
         self.classification_headers.apply(weights_init)
         self.regression_headers.apply(weights_init)
 
-    def forward(self, x):
+    def forward(self, x, targets=None):
         sources = []
         confidences = []
         locations = []
@@ -68,6 +70,7 @@ class SSD(nn.Module):
         locations = locations.view(locations.size(0), -1, 4)
 
         if not self.training:
+            # when evaluating, decode predictions
             if self.priors is None:
                 self.priors = PriorBox(self.cfg)().to(locations.device)
             confidences = F.softmax(confidences, dim=2)
@@ -75,10 +78,16 @@ class SSD(nn.Module):
                 locations, self.priors, self.cfg.MODEL.CENTER_VARIANCE, self.cfg.MODEL.SIZE_VARIANCE
             )
             boxes = box_utils.center_form_to_corner_form(boxes)
-
             return confidences, boxes
         else:
-            return confidences, locations
+            # when training, compute losses
+            gt_boxes, gt_labels = targets
+            regression_loss, classification_loss = self.criterion(confidences, locations, gt_labels, gt_boxes)
+            loss_dict = dict(
+                regression_loss=regression_loss,
+                classification_loss=classification_loss,
+            )
+            return loss_dict
 
     def init_from_base_net(self, model):
         vgg_weights = torch.load(model, map_location=lambda storage, loc: storage)

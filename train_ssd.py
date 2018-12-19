@@ -12,7 +12,6 @@ from ssd.data.datasets import build_dataset
 from ssd.engine.inference import do_evaluation
 from ssd.engine.trainer import do_train
 from ssd.modeling.data_preprocessing import TrainAugmentation
-from ssd.modeling.multibox_loss import MultiBoxLoss
 from ssd.modeling.ssd import MatchPrior
 from ssd.modeling.vgg_ssd import build_ssd_model
 from ssd.module.prior_box import PriorBox
@@ -43,10 +42,6 @@ def train(cfg, args):
     # -----------------------------------------------------------------------------
     lr = cfg.SOLVER.LR * args.num_gpus  # scale by num gpus
     optimizer = torch.optim.SGD(model.parameters(), lr=lr, momentum=cfg.SOLVER.MOMENTUM, weight_decay=cfg.SOLVER.WEIGHT_DECAY)
-    # -----------------------------------------------------------------------------
-    # Criterion
-    # -----------------------------------------------------------------------------
-    criterion = MultiBoxLoss(neg_pos_ratio=cfg.MODEL.NEG_POS_RATIO)
 
     # -----------------------------------------------------------------------------
     # Scheduler
@@ -73,7 +68,7 @@ def train(cfg, args):
     batch_sampler = samplers.IterationBasedBatchSampler(batch_sampler, num_iterations=cfg.SOLVER.MAX_ITER // args.num_gpus)
     train_loader = DataLoader(train_dataset, num_workers=4, batch_sampler=batch_sampler, pin_memory=True)
 
-    return do_train(cfg, model, train_loader, optimizer, scheduler, criterion, device, args)
+    return do_train(cfg, model, train_loader, optimizer, scheduler, device, args)
 
 
 def main():
