@@ -86,19 +86,21 @@ def do_train(cfg, model,
         end = time.time()
         if iteration % args.log_step == 0:
             eta_seconds = int((trained_time / iteration) * (max_iter - iteration))
-            logger.info(
-                "Iter: {:06d}, Lr: {:.5f}, Cost: {:.2f}s, Eta: {}, ".format(iteration, optimizer.param_groups[0]['lr'],
-                                                                            time.time() - tic,
-                                                                            str(datetime.timedelta(seconds=eta_seconds))) +
-                "Loss: {:.3f}, ".format(losses_reduced.item()) +
-                "Regression Loss {:.3f}, ".format(loss_dict_reduced['regression_loss'].item()) +
-                "Classification Loss: {:.3f}".format(loss_dict_reduced['classification_loss'].item()))
-
+            log_str = [
+                "Iter: {:06d}, Lr: {:.5f}, Cost: {:.2f}s, Eta: {}".format(iteration,
+                                                                          optimizer.param_groups[0]['lr'],
+                                                                          time.time() - tic, str(datetime.timedelta(seconds=eta_seconds))),
+                "total_loss: {:.3f}".format(losses_reduced.item())
+            ]
+            for loss_name, loss_item in loss_dict_reduced.items():
+                log_str.append("{}: {:.3f}".format(loss_name, loss_item.item()))
+            log_str = ', '.join(log_str)
+            logger.info(log_str)
             if summary_writer:
                 global_step = iteration
-                summary_writer.add_scalar('losses/total_loss', losses_reduced.item(), global_step=global_step)
-                summary_writer.add_scalar('losses/location_loss', loss_dict_reduced['regression_loss'].item(), global_step=global_step)
-                summary_writer.add_scalar('losses/class_loss', loss_dict_reduced['classification_loss'].item(), global_step=global_step)
+                summary_writer.add_scalar('losses/total_loss', losses_reduced, global_step=global_step)
+                for loss_name, loss_item in loss_dict_reduced.items():
+                    summary_writer.add_scalar('losses/{}'.format(loss_name), loss_item, global_step=global_step)
                 summary_writer.add_scalar('lr', optimizer.param_groups[0]['lr'], global_step=global_step)
 
             tic = time.time()
