@@ -151,8 +151,8 @@ Currently, I provide weights trained as follows:
 
 |         |    Weights   |
 | :-----: | :----------: |
-| SSD300* | [ssd300_voc0712_mAP77.83.pth(100 MB)](https://github.com/lufficc/SSD/releases/download/v1.0/ssd300_voc0712_mAP77.83.pth) |
-| SSD512* | [ssd512_voc0712_mAP80.25.pth(104 MB)](https://github.com/lufficc/SSD/releases/download/v1.0/ssd512_voc0712_mAP80.25.pth) |
+| SSD300* | [ssd300_voc0712_mAP77.83.pth(100 MB)](https://github.com/lufficc/SSD/releases/download/v1.0.1/ssd300_voc0712_mAP77.83.pth) |
+| SSD512* | [ssd512_voc0712_mAP80.25.pth(104 MB)](https://github.com/lufficc/SSD/releases/download/v1.0.1/ssd512_voc0712_mAP80.25.pth) |
 
 ## Performance
 ### Origin Paper:
