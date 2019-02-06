@@ -110,7 +110,12 @@ def do_train(cfg, model,
             _save_model(logger, model, model_path)
         # Do eval when training, to trace the mAP changes and see performance improved whether or nor
         if args.eval_step > 0 and iteration % args.eval_step == 0 and not iteration == max_iter:
-            do_evaluation(cfg, model, cfg.OUTPUT_DIR, distributed=args.distributed)
+            dataset_metrics = do_evaluation(cfg, model, cfg.OUTPUT_DIR, distributed=args.distributed)
+            if summary_writer:
+                global_step = iteration
+                for dataset_name, metrics in dataset_metrics.items():
+                    for metric_name, metric_value in metrics.get_printable_metrics().items():
+                        summary_writer.add_scalar('/'.join(['val', dataset_name, metric_name]), metric_value, global_step=global_step)
             model.train()
 
     if save_to_disk:

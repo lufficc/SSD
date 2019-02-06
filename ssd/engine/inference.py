@@ -89,6 +89,9 @@ def do_evaluation(cfg, model, output_dir, distributed):
     # evaluate all test datasets.
     logger = logging.getLogger("SSD.inference")
     logger.info('Will evaluate {} dataset(s):'.format(len(test_datasets)))
+    metrics = {}
     for dataset_name, test_dataset in zip(cfg.DATASETS.TEST, test_datasets):
-        _evaluation(cfg, dataset_name, test_dataset, predictor, distributed, output_dir)
+        metric = _evaluation(cfg, dataset_name, test_dataset, predictor, distributed, output_dir)
+        metrics[dataset_name] = metric
         distributed_util.synchronize()
+    return metrics
