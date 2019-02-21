@@ -39,5 +39,7 @@ def evaluate(dataset, predictions, output_dir):
         evaluation_result = voc_evaluation(**args)
     elif isinstance(dataset, COCODataset):
         evaluation_result = coco_evaluation(**args)
+    else:
+        raise NotImplementedError
 
     return EvaluationMetrics(dataset, evaluation_result)
