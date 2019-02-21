@@ -168,7 +168,7 @@ Currently, I provide weights trained as follows:
 |         | VOC2007 test |          COCO 2014 minival               |
 | :-----: | :----------: |   :----------------------------------:   |
 |  Train  |     07+12    |          trainval35k                     |
-| SSD300* |     77.8     |          22.9(not on test-dev2015)       |
+| SSD300* |     77.8     |          25.5                            |
 | SSD512* |     80.2     |          -                               |
 
 ### Details:
