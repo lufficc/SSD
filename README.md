@@ -3,6 +3,15 @@
 
 This repository implements [SSD (Single Shot MultiBox Detector)](https://arxiv.org/abs/1512.02325). The implementation is heavily influenced by the projects [ssd.pytorch](https://github.com/amdegroot/ssd.pytorch), [pytorch-ssd](https://github.com/qfgaohao/pytorch-ssd) and [maskrcnn-benchmark](https://github.com/facebookresearch/maskrcnn-benchmark). This repository aims to be the code base for researches based on SSD.
 
+<div align="center">
+  <img src="figures/004545.jpg" width="500px" />
+  <p>Example SSD output (ssd300_voc0712).</p>
+</div>
+
+| Losses        | Learning rate | Metrics |
+| :-----------: |:-------------:| :------:|
+| ![losses](figures/losses.png) | ![lr](figures/lr.png) | ![metric](figures/metrics.png) |
+
 ## Highlights
 
 - PyTorch 1.0
