@@ -13,7 +13,7 @@ from ssd.utils import distributed_util
 
 
 def _accumulate_predictions_from_multiple_gpus(predictions_per_gpu):
-    all_predictions = distributed_util.scatter_gather(predictions_per_gpu)
+    all_predictions = distributed_util.all_gather(predictions_per_gpu)
     if not distributed_util.is_main_process():
         return
     # merge the list of dicts
