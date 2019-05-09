@@ -65,8 +65,9 @@ wget https://s3.amazonaws.com/amdegroot-models/vgg16_reducedfc.pth
 
 ### Build
 
+NMS build is not necessary, as we provide a python-like nms, but is 2x slower than build-version.
 ```bash
-# build nms, this is needed when evaluating. Only training doesn't need this.
+# For faster inference you need to build nms, this is needed when evaluating. Only training doesn't need this.
 cd ext
 python build.py build_ext develop
 ```
