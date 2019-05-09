@@ -1,6 +1,11 @@
-import torch_extension
+try:
+    import torch_extension
 
-_nms = torch_extension.nms
+    _nms = torch_extension.nms
+except ImportError:
+    from .python_nms import python_nms
+
+    _nms = python_nms
 
 
 def boxes_nms(boxes, scores, nms_thresh, max_count=-1):
