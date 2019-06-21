@@ -3,6 +3,7 @@ from yacs.config import CfgNode as CN
 _C = CN()
 
 _C.MODEL = CN()
+_C.MODEL.META_ARCHITECTURE = 'SSDDetector'
 _C.MODEL.DEVICE = "cuda"
 # match default boxes to any ground truth with jaccard overlap higher than a threshold (0.5)
 _C.MODEL.THRESHOLD = 0.5
@@ -11,6 +12,11 @@ _C.MODEL.NUM_CLASSES = 21
 _C.MODEL.NEG_POS_RATIO = 3
 _C.MODEL.CENTER_VARIANCE = 0.1
 _C.MODEL.SIZE_VARIANCE = 0.2
+
+_C.MODEL.BACKBONE = CN()
+_C.MODEL.BACKBONE.NAME = 'vgg'
+_C.MODEL.BACKBONE.OUT_CHANNELS = (512, 1024, 512, 256, 256, 256)
+
 # -----------------------------------------------------------------------------
 # PRIORS
 # -----------------------------------------------------------------------------
@@ -67,5 +73,6 @@ _C.TEST.CONFIDENCE_THRESHOLD = 0.01
 # change MAX_PER_CLASS to 400 as official caffe code will slightly increase mAP(0.8025=>0.8063, 0.7783=>0.7798)
 _C.TEST.MAX_PER_CLASS = 200
 _C.TEST.MAX_PER_IMAGE = -1
+_C.TEST.BATCH_SIZE = 10
 
 _C.OUTPUT_DIR = 'output'

@@ -5,7 +5,11 @@ import os
 
 def coco_evaluation(dataset, predictions, output_dir):
     coco_results = []
-    for i, (boxes, labels, scores) in enumerate(predictions):
+    for i, prediction in enumerate(predictions):
+        img_info = dataset.get_img_info(i)
+        prediction = prediction.resize((img_info['width'], img_info['height'])).numpy()
+        boxes, labels, scores = prediction['boxes'], prediction['labels'], prediction['scores']
+
         image_id, annotation = dataset.get_annotation(i)
         class_mapper = dataset.contiguous_id_to_coco_id
         if labels.shape[0] == 0:
@@ -38,4 +42,9 @@ def coco_evaluation(dataset, predictions, output_dir):
     coco_eval.evaluate()
     coco_eval.accumulate()
     coco_eval.summarize()
-    return coco_eval
+
+    keys = ["AP", "AP50", "AP75", "APs", "APm", "APl"]
+    metrics = {}
+    for i, key in enumerate(keys):
+        metrics[key] = coco_eval.stats[i]
+    return dict(metrics=metrics)

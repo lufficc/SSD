@@ -1,5 +1,12 @@
 import torch.nn as nn
-from ssd.modeling.ssd import SSD
+import torch.nn.functional as F
+
+from ssd.layers import L2Norm
+from ssd.utils.model_zoo import load_state_dict_from_url
+
+model_urls = {
+    'vgg': 'https://s3.amazonaws.com/amdegroot-models/vgg16_reducedfc.pth',
+}
 
 
 # borrowed from https://github.com/amdegroot/ssd.pytorch/blob/master/ssd.py
@@ -62,34 +69,61 @@ def add_header(vgg, extra_layers, boxes_per_location, num_classes):
     return regression_headers, classification_headers
 
 
-def build_ssd_model(cfg):
-    num_classes = cfg.MODEL.NUM_CLASSES
-    size = cfg.INPUT.IMAGE_SIZE
-    vgg_base = {
-        '300': [64, 64, 'M', 128, 128, 'M', 256, 256, 256, 'C', 512, 512, 512, 'M',
-                512, 512, 512],
-        '512': [64, 64, 'M', 128, 128, 'M', 256, 256, 256, 'C', 512, 512, 512, 'M',
-                512, 512, 512],
-    }
-    extras_base = {
-        '300': [256, 'S', 512, 128, 'S', 256, 128, 256, 128, 256],
-        '512': [256, 'S', 512, 128, 'S', 256, 128, 'S', 256, 128, 'S', 256],
-    }
+vgg_base = {
+    '300': [64, 64, 'M', 128, 128, 'M', 256, 256, 256, 'C', 512, 512, 512, 'M',
+            512, 512, 512],
+    '512': [64, 64, 'M', 128, 128, 'M', 256, 256, 256, 'C', 512, 512, 512, 'M',
+            512, 512, 512],
+}
+extras_base = {
+    '300': [256, 'S', 512, 128, 'S', 256, 128, 256, 128, 256],
+    '512': [256, 'S', 512, 128, 'S', 256, 128, 'S', 256, 128, 'S', 256],
+}
 
-    boxes_per_location = cfg.MODEL.PRIORS.BOXES_PER_LOCATION
 
-    vgg_config = vgg_base[str(size)]
-    extras_config = extras_base[str(size)]
+class VGG(nn.Module):
+    def __init__(self, cfg):
+        super().__init__()
+        size = cfg.INPUT.IMAGE_SIZE
+        vgg_config = vgg_base[str(size)]
+        extras_config = extras_base[str(size)]
 
-    vgg = nn.ModuleList(add_vgg(vgg_config))
-    extras = nn.ModuleList(add_extras(extras_config, i=1024, size=size))
+        self.vgg = nn.ModuleList(add_vgg(vgg_config))
+        self.extras = nn.ModuleList(add_extras(extras_config, i=1024, size=size))
+        self.l2_norm = L2Norm(512, scale=20)
+        self.reset_parameters()
 
-    regression_headers, classification_headers = add_header(vgg, extras, boxes_per_location, num_classes=num_classes)
-    regression_headers = nn.ModuleList(regression_headers)
-    classification_headers = nn.ModuleList(classification_headers)
+    def reset_parameters(self):
+        for m in self.extras.modules():
+            if isinstance(m, nn.Conv2d):
+                nn.init.xavier_uniform_(m.weight)
+                nn.init.zeros_(m.bias)
 
-    return SSD(cfg=cfg,
-               vgg=vgg,
-               extras=extras,
-               classification_headers=classification_headers,
-               regression_headers=regression_headers)
+    def init_from_pretrain(self, state_dict):
+        self.vgg.load_state_dict(state_dict)
+
+    def forward(self, x):
+        features = []
+        for i in range(23):
+            x = self.vgg[i](x)
+        s = self.l2_norm(x)  # Conv4_3 L2 normalization
+        features.append(s)
+
+        # apply vgg up to fc7
+        for i in range(23, len(self.vgg)):
+            x = self.vgg[i](x)
+        features.append(x)
+
+        for k, v in enumerate(self.extras):
+            x = F.relu(v(x), inplace=True)
+            if k % 2 == 1:
+                features.append(x)
+
+        return tuple(features)
+
+
+def vgg(cfg, pretrained=True):
+    model = VGG(cfg)
+    if pretrained:
+        model.init_from_pretrain(load_state_dict_from_url(model_urls['vgg']))
+    return model

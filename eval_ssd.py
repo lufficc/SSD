@@ -6,22 +6,41 @@ import torch
 import torch.utils.data
 
 from ssd.config import cfg
-from ssd.engine.inference import do_evaluation
-from ssd.modeling.vgg_ssd import build_ssd_model
-from ssd.utils import distributed_util
+from ssd.data.build import make_data_loader
+from ssd.engine.inference import inference
+from ssd.modeling.detector import build_detection_model
+from ssd.utils import dist_util, mkdir
+from ssd.utils.checkpoint import CheckPointer
+from ssd.utils.dist_util import synchronize
 from ssd.utils.logger import setup_logger
 
 
-def evaluation(cfg, weights_file, output_dir, distributed):
-    if not os.path.exists(output_dir):
-        os.makedirs(output_dir)
+@torch.no_grad()
+def do_evaluation(cfg, model, distributed):
+    if isinstance(model, torch.nn.parallel.DistributedDataParallel):
+        model = model.module
+    model.eval()
     device = torch.device(cfg.MODEL.DEVICE)
-    model = build_ssd_model(cfg)
-    model.load(weights_file)
+    data_loaders_val = make_data_loader(cfg, is_train=False, distributed=distributed)
+    eval_results = []
+    for dataset_name, data_loader in zip(cfg.DATASETS.TEST, data_loaders_val):
+        output_folder = os.path.join(cfg.OUTPUT_DIR, "inference", dataset_name)
+        if not os.path.exists(output_folder):
+            mkdir(output_folder)
+        eval_result = inference(model, data_loader, dataset_name, device, output_folder)
+        eval_results.append(eval_result)
+    return eval_results
+
+
+def evaluation(cfg, ckpt, distributed):
     logger = logging.getLogger("SSD.inference")
-    logger.info('Loaded weights from {}.'.format(weights_file))
+
+    model = build_detection_model(cfg)
+    checkpointer = CheckPointer(model, save_dir=cfg.OUTPUT_DIR, logger=logger)
+    device = torch.device(cfg.MODEL.DEVICE)
     model.to(device)
-    do_evaluation(cfg, model, output_dir, distributed)
+    checkpointer.load(ckpt, use_latest=ckpt is None)
+    do_evaluation(cfg, model, distributed)
 
 
 def main():
@@ -34,7 +53,13 @@ def main():
         type=str,
     )
     parser.add_argument("--local_rank", type=int, default=0)
-    parser.add_argument("--weights", type=str, help="Trained weights.")
+    parser.add_argument(
+        "--ckpt",
+        help="The path to the checkpoint for test, default is the latest checkpoint.",
+        default=None,
+        type=str,
+    )
+
     parser.add_argument("--output_dir", default="eval_results", type=str, help="The directory to store evaluation results.")
 
     parser.add_argument(
@@ -55,12 +80,13 @@ def main():
     if distributed:
         torch.cuda.set_device(args.local_rank)
         torch.distributed.init_process_group(backend="nccl", init_method="env://")
+        synchronize()
 
     cfg.merge_from_file(args.config_file)
     cfg.merge_from_list(args.opts)
     cfg.freeze()
 
-    logger = setup_logger("SSD", distributed_util.get_rank())
+    logger = setup_logger("SSD", dist_util.get_rank())
     logger.info("Using {} GPUs".format(num_gpus))
     logger.info(args)
 
@@ -69,7 +95,7 @@ def main():
         config_str = "\n" + cf.read()
         logger.info(config_str)
     logger.info("Running with config:\n{}".format(cfg))
-    evaluation(cfg, weights_file=args.weights, output_dir=args.output_dir, distributed=distributed)
+    evaluation(cfg, ckpt=args.ckpt, distributed=distributed)
 
 
 if __name__ == '__main__':

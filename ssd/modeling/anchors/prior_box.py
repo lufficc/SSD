@@ -1,13 +1,11 @@
 from itertools import product
 
 import torch
-import torch.nn as nn
 from math import sqrt
 
 
-class PriorBox(nn.Module):
+class PriorBox:
     def __init__(self, cfg):
-        super(PriorBox, self).__init__()
         self.image_size = cfg.INPUT.IMAGE_SIZE
         prior_config = cfg.MODEL.PRIORS
         self.feature_maps = prior_config.FEATURE_MAPS
@@ -17,7 +15,7 @@ class PriorBox(nn.Module):
         self.aspect_ratios = prior_config.ASPECT_RATIOS
         self.clip = prior_config.CLIP
 
-    def forward(self):
+    def __call__(self):
         """Generate SSD Prior Boxes.
             It returns the center, height and width of the priors. The values are relative to the image size
             Returns:
@@ -50,7 +48,7 @@ class PriorBox(nn.Module):
                     priors.append([cx, cy, w * ratio, h / ratio])
                     priors.append([cx, cy, w / ratio, h * ratio])
 
-        priors = torch.Tensor(priors)
+        priors = torch.tensor(priors)
         if self.clip:
             priors.clamp_(max=1, min=0)
         return priors

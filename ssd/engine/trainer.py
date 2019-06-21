@@ -1,13 +1,23 @@
+import collections
 import datetime
 import logging
 import os
 import time
 import torch
 import torch.distributed as dist
-from torch.nn.parallel import DistributedDataParallel
 
-from ssd.engine.inference import do_evaluation
-from ssd.utils import distributed_util
+from eval_ssd import do_evaluation
+from ssd.utils import dist_util
+
+
+def write_metric(eval_result, prefix, summary_writer, global_step):
+    for key in eval_result:
+        value = eval_result[key]
+        tag = '{}/{}'.format(prefix, key)
+        if isinstance(value, collections.Mapping):
+            write_metric(value, tag, summary_writer, global_step)
+        else:
+            summary_writer.add_scalar(tag, value, global_step=global_step)
 
 
 def reduce_loss_dict(loss_dict):
@@ -16,7 +26,7 @@ def reduce_loss_dict(loss_dict):
     0 has the averaged results. Returns a dict with the same fields as
     loss_dict, after reduction.
     """
-    world_size = distributed_util.get_world_size()
+    world_size = dist_util.get_world_size()
     if world_size < 2:
         return loss_dict
     with torch.no_grad():
@@ -35,45 +45,40 @@ def reduce_loss_dict(loss_dict):
     return reduced_losses
 
 
-def _save_model(logger, model, model_path):
-    vgg_model = model
-    if isinstance(model, DistributedDataParallel):
-        vgg_model = model.module
-    vgg_model.save(model_path)
-    logger.info("Saved checkpoint to {}".format(model_path))
-
-
 def do_train(cfg, model,
              data_loader,
              optimizer,
              scheduler,
+             checkpointer,
              device,
+             arguments,
              args):
     logger = logging.getLogger("SSD.trainer")
-    logger.info("Start training")
+    logger.info("Start training...")
     model.train()
-    save_to_disk = distributed_util.get_rank() == 0
+    save_to_disk = dist_util.get_rank() == 0
     if args.use_tensorboard and save_to_disk:
         import tensorboardX
 
-        summary_writer = tensorboardX.SummaryWriter(log_dir=cfg.OUTPUT_DIR)
+        summary_writer = tensorboardX.SummaryWriter(log_dir=os.path.join(cfg.OUTPUT_DIR, 'tf_logs'))
     else:
         summary_writer = None
 
     max_iter = len(data_loader)
+    start_iter = arguments["iteration"]
     start_training_time = time.time()
     trained_time = 0
     tic = time.time()
     end = time.time()
-    for iteration, (images, boxes, labels) in enumerate(data_loader):
+    for iteration, (images, targets, _) in enumerate(data_loader, start_iter):
         iteration = iteration + 1
+        arguments["iteration"] = iteration
         scheduler.step()
         images = images.to(device)
-        boxes = boxes.to(device)
-        labels = labels.to(device)
+        targets = targets.to(device)
 
         optimizer.zero_grad()
-        loss_dict = model(images, targets=(boxes, labels))
+        loss_dict = model(images, targets=targets)
 
         # reduce losses over all GPUs for logging purposes
         loss_dict_reduced = reduce_loss_dict(loss_dict)
@@ -87,7 +92,7 @@ def do_train(cfg, model,
         if iteration % args.log_step == 0:
             eta_seconds = int((trained_time / iteration) * (max_iter - iteration))
             log_str = [
-                "Iter: {:06d}, Lr: {:.5f}, Cost: {:.2f}s, Eta: {}".format(iteration,
+                "iter: {:06d}, lr: {:.5f}, cost: {:.2f}s, eta: {}".format(iteration,
                                                                           optimizer.param_groups[0]['lr'],
                                                                           time.time() - tic, str(datetime.timedelta(seconds=eta_seconds))),
                 "total_loss: {:.3f}".format(losses_reduced.item())
@@ -105,22 +110,17 @@ def do_train(cfg, model,
 
             tic = time.time()
 
-        if save_to_disk and iteration % args.save_step == 0:
-            model_path = os.path.join(cfg.OUTPUT_DIR, "ssd{}_vgg_iteration_{:06d}.pth".format(cfg.INPUT.IMAGE_SIZE, iteration))
-            _save_model(logger, model, model_path)
-        # Do eval when training, to trace the mAP changes and see performance improved whether or nor
+        if iteration % args.save_step == 0:
+            checkpointer.save("model_{:06d}".format(iteration), **arguments)
+
         if args.eval_step > 0 and iteration % args.eval_step == 0 and not iteration == max_iter:
-            dataset_metrics = do_evaluation(cfg, model, cfg.OUTPUT_DIR, distributed=args.distributed)
-            if summary_writer:
-                global_step = iteration
-                for dataset_name, metrics in dataset_metrics.items():
-                    for metric_name, metric_value in metrics.get_printable_metrics().items():
-                        summary_writer.add_scalar('/'.join(['val', dataset_name, metric_name]), metric_value, global_step=global_step)
+            eval_results = do_evaluation(cfg, model, distributed=args.distributed)
+            if dist_util.get_rank() and summary_writer:
+                for eval_result, dataset in zip(eval_results, cfg.DATASETS.TEST):
+                    write_metric(eval_result['metrics'], 'metrics/' + dataset, summary_writer, iteration)
             model.train()
 
-    if save_to_disk:
-        model_path = os.path.join(cfg.OUTPUT_DIR, "ssd{}_vgg_final.pth".format(cfg.INPUT.IMAGE_SIZE))
-        _save_model(logger, model, model_path)
+    checkpointer.save("model_final.pth", **arguments)
     # compute training time
     total_training_time = int(time.time() - start_training_time)
     total_time_str = str(datetime.timedelta(seconds=total_training_time))
