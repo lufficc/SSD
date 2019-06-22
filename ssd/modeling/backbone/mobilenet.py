@@ -108,11 +108,11 @@ class MobileNetV2(nn.Module):
 
     def forward(self, x):
         features = []
-        for i in range(15):
+        for i in range(14):
             x = self.features[i](x)
         features.append(x)
 
-        for i in range(15, len(self.features)):
+        for i in range(14, len(self.features)):
             x = self.features[i](x)
         features.append(x)
 

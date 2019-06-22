@@ -16,13 +16,6 @@ class SSDHeader(nn.Module):
         self.loss_evaluator = MultiBoxLoss(neg_pos_ratio=cfg.MODEL.NEG_POS_RATIO)
         self.post_processor = PostProcessor(cfg)
         self.priors = None
-        self.reset_parameters()
-
-    def reset_parameters(self):
-        for m in self.modules():
-            if isinstance(m, nn.Conv2d):
-                nn.init.xavier_uniform_(m.weight)
-                nn.init.zeros_(m.bias)
 
     def forward(self, features, targets=None):
         cls_logits, bbox_pred = self.predictor(features)

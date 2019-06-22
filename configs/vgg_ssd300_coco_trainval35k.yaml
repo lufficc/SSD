@@ -19,4 +19,4 @@ SOLVER:
   BATCH_SIZE: 32
   LR: 1e-3
 
-OUTPUT_DIR: 'output_vgg_ssd300_coco'
+OUTPUT_DIR: 'outputs/vgg_ssd300_coco_trainval35k'

@@ -20,3 +20,5 @@ SOLVER:
   GAMMA: 0.1
   BATCH_SIZE: 24
   LR: 1e-3
+
+OUTPUT_DIR: 'outputs/vgg_ssd512_voc0712'

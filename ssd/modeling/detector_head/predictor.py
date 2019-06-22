@@ -10,15 +10,15 @@ class Predictor(nn.Module):
         self.cfg = cfg
         self.cls_headers = nn.ModuleList()
         self.reg_headers = nn.ModuleList()
-        for boxes_per_location, out_channels in zip(cfg.MODEL.PRIORS.BOXES_PER_LOCATION, cfg.MODEL.BACKBONE.OUT_CHANNELS):
-            self.cls_headers.append(self.cls_block(out_channels, boxes_per_location))
-            self.reg_headers.append(self.reg_block(out_channels, boxes_per_location))
+        for level, (boxes_per_location, out_channels) in enumerate(zip(cfg.MODEL.PRIORS.BOXES_PER_LOCATION, cfg.MODEL.BACKBONE.OUT_CHANNELS)):
+            self.cls_headers.append(self.cls_block(level, out_channels, boxes_per_location))
+            self.reg_headers.append(self.reg_block(level, out_channels, boxes_per_location))
         self.reset_parameters()
 
-    def cls_block(self, out_channels, boxes_per_location):
+    def cls_block(self, level, out_channels, boxes_per_location):
         raise NotImplementedError
 
-    def reg_block(self, out_channels, boxes_per_location):
+    def reg_block(self, level, out_channels, boxes_per_location):
         raise NotImplementedError
 
     def reset_parameters(self):
@@ -43,14 +43,14 @@ class Predictor(nn.Module):
 
 @registry.PREDICTORS.register('SSDPredictor')
 class SSDPredictor(Predictor):
-    def cls_block(self, out_channels, boxes_per_location):
+    def cls_block(self, level, out_channels, boxes_per_location):
         return nn.Conv2d(out_channels, boxes_per_location * self.cfg.MODEL.NUM_CLASSES, kernel_size=3, stride=1, padding=1)
 
-    def reg_block(self, out_channels, boxes_per_location):
+    def reg_block(self, level, out_channels, boxes_per_location):
         return nn.Conv2d(out_channels, boxes_per_location * 4, kernel_size=3, stride=1, padding=1)
 
 
-def SeperableConv2d(in_channels, out_channels, kernel_size=1, stride=1, padding=0, onnx_compatible=False):
+def SeparableConv2d(in_channels, out_channels, kernel_size=1, stride=1, padding=0, onnx_compatible=False):
     ReLU = nn.ReLU if onnx_compatible else nn.ReLU6
     return nn.Sequential(
         nn.Conv2d(in_channels=in_channels, out_channels=in_channels, kernel_size=kernel_size, groups=in_channels, stride=stride, padding=padding),
@@ -62,11 +62,17 @@ def SeperableConv2d(in_channels, out_channels, kernel_size=1, stride=1, padding=
 
 @registry.PREDICTORS.register('SSDLitePredictor')
 class SSDLitePredictor(Predictor):
-    def cls_block(self, out_channels, boxes_per_location):
-        return SeperableConv2d(out_channels, boxes_per_location * self.cfg.MODEL.NUM_CLASSES, kernel_size=3, stride=1, padding=1)
+    def cls_block(self, level, out_channels, boxes_per_location):
+        num_levels = len(self.cfg.MODEL.BACKBONE.OUT_CHANNELS)
+        if level == num_levels - 1:
+            return nn.Conv2d(out_channels, boxes_per_location * self.cfg.MODEL.NUM_CLASSES, kernel_size=1)
+        return SeparableConv2d(out_channels, boxes_per_location * self.cfg.MODEL.NUM_CLASSES, kernel_size=3, stride=1, padding=1)
 
-    def reg_block(self, out_channels, boxes_per_location):
-        return SeperableConv2d(out_channels, boxes_per_location * 4, kernel_size=3, stride=1, padding=1)
+    def reg_block(self, level, out_channels, boxes_per_location):
+        num_levels = len(self.cfg.MODEL.BACKBONE.OUT_CHANNELS)
+        if level == num_levels - 1:
+            return nn.Conv2d(out_channels, boxes_per_location * 4, kernel_size=1)
+        return SeparableConv2d(out_channels, boxes_per_location * 4, kernel_size=3, stride=1, padding=1)
 
 
 def make_predictor(cfg):
