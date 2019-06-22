@@ -15,12 +15,12 @@ def vgg(cfg, pretrained=True):
 
 
 @registry.BACKBONES.register('mobilenet_v2')
-def mobilenet_v2(cfg, pretrained=False):
+def mobilenet_v2(cfg, pretrained=True):
     model = MobileNetV2()
     if pretrained:
-        model.load_state_dict(load_state_dict_from_url(mobilenet_model_urls['mobilenet_v2']))
+        model.load_state_dict(load_state_dict_from_url(mobilenet_model_urls['mobilenet_v2']), strict=False)
     return model
 
 
 def build_backbone(cfg):
-    return registry.BACKBONES[cfg.MODEL.BACKBONE.NAME](cfg)
+    return registry.BACKBONES[cfg.MODEL.BACKBONE.NAME](cfg, cfg.MODEL.BACKBONE.PRETRAINED)
