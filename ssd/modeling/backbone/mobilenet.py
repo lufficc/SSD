@@ -1,5 +1,8 @@
 from torch import nn
 
+from ssd.modeling import registry
+from ssd.utils.model_zoo import load_state_dict_from_url
+
 model_urls = {
     'mobilenet_v2': 'https://download.pytorch.org/models/mobilenet_v2-b0353104.pth',
 }
@@ -121,3 +124,11 @@ class MobileNetV2(nn.Module):
             features.append(x)
 
         return tuple(features)
+
+
+@registry.BACKBONES.register('mobilenet_v2')
+def mobilenet_v2(cfg, pretrained=True):
+    model = MobileNetV2()
+    if pretrained:
+        model.load_state_dict(load_state_dict_from_url(model_urls['mobilenet_v2']), strict=False)
+    return model
