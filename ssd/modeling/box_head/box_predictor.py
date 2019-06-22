@@ -4,7 +4,7 @@ from torch import nn
 from ssd.modeling import registry
 
 
-class Predictor(nn.Module):
+class BoxPredictor(nn.Module):
     def __init__(self, cfg):
         super().__init__()
         self.cfg = cfg
@@ -41,8 +41,8 @@ class Predictor(nn.Module):
         return cls_logits, bbox_pred
 
 
-@registry.PREDICTORS.register('SSDPredictor')
-class SSDPredictor(Predictor):
+@registry.BOX_PREDICTORS.register('SSDBoxPredictor')
+class SSDBoxPredictor(BoxPredictor):
     def cls_block(self, level, out_channels, boxes_per_location):
         return nn.Conv2d(out_channels, boxes_per_location * self.cfg.MODEL.NUM_CLASSES, kernel_size=3, stride=1, padding=1)
 
@@ -60,8 +60,8 @@ def SeparableConv2d(in_channels, out_channels, kernel_size=1, stride=1, padding=
     )
 
 
-@registry.PREDICTORS.register('SSDLitePredictor')
-class SSDLitePredictor(Predictor):
+@registry.BOX_PREDICTORS.register('SSDLiteBoxPredictor')
+class SSDLiteBoxPredictor(BoxPredictor):
     def cls_block(self, level, out_channels, boxes_per_location):
         num_levels = len(self.cfg.MODEL.BACKBONE.OUT_CHANNELS)
         if level == num_levels - 1:
@@ -75,5 +75,5 @@ class SSDLitePredictor(Predictor):
         return SeparableConv2d(out_channels, boxes_per_location * 4, kernel_size=3, stride=1, padding=1)
 
 
-def make_predictor(cfg):
-    return registry.PREDICTORS[cfg.MODEL.PREDICTOR](cfg)
+def make_box_predictor(cfg):
+    return registry.BOX_PREDICTORS[cfg.MODEL.PREDICTOR](cfg)
