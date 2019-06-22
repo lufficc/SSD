@@ -2,7 +2,6 @@ import torch.nn as nn
 import torch.nn.functional as F
 
 from ssd.layers import L2Norm
-from ssd.utils.model_zoo import load_state_dict_from_url
 
 model_urls = {
     'vgg': 'https://s3.amazonaws.com/amdegroot-models/vgg16_reducedfc.pth',
@@ -120,10 +119,3 @@ class VGG(nn.Module):
                 features.append(x)
 
         return tuple(features)
-
-
-def vgg(cfg, pretrained=True):
-    model = VGG(cfg)
-    if pretrained:
-        model.init_from_pretrain(load_state_dict_from_url(model_urls['vgg']))
-    return model

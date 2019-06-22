@@ -55,7 +55,7 @@ def main():
         type=str,
     )
     parser.add_argument("--local_rank", type=int, default=0)
-    parser.add_argument('--log_step', default=20, type=int, help='Print logs every log_step')
+    parser.add_argument('--log_step', default=10, type=int, help='Print logs every log_step')
     parser.add_argument('--save_step', default=2500, type=int, help='Save checkpoint every save_step')
     parser.add_argument('--eval_step', default=2500, type=int, help='Evaluate dataset every eval_step, disabled when eval_step < 0')
     parser.add_argument('--use_tensorboard', default=True, type=str2bool)

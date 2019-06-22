@@ -4,6 +4,7 @@ _C = CN()
 
 _C.MODEL = CN()
 _C.MODEL.META_ARCHITECTURE = 'SSDDetector'
+_C.MODEL.PREDICTOR = 'SSDPredictor'
 _C.MODEL.DEVICE = "cuda"
 # match default boxes to any ground truth with jaccard overlap higher than a threshold (0.5)
 _C.MODEL.THRESHOLD = 0.5
@@ -70,9 +71,8 @@ _C.SOLVER.WARMUP_ITERS = 500
 _C.TEST = CN()
 _C.TEST.NMS_THRESHOLD = 0.45
 _C.TEST.CONFIDENCE_THRESHOLD = 0.01
-# change MAX_PER_CLASS to 400 as official caffe code will slightly increase mAP(0.8025=>0.8063, 0.7783=>0.7798)
-_C.TEST.MAX_PER_CLASS = 200
-_C.TEST.MAX_PER_IMAGE = -1
+_C.TEST.MAX_PER_CLASS = -1
+_C.TEST.MAX_PER_IMAGE = 100
 _C.TEST.BATCH_SIZE = 10
 
 _C.OUTPUT_DIR = 'output'

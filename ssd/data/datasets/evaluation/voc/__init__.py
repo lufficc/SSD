@@ -18,7 +18,6 @@ def voc_evaluation(dataset, predictions, output_dir):
     gt_difficults = []
 
     for i in range(len(dataset)):
-        prediction = predictions[i]
         image_id, annotation = dataset.get_annotation(i)
         gt_boxes, gt_labels, is_difficult = annotation
         gt_boxes_list.append(gt_boxes)
@@ -26,6 +25,7 @@ def voc_evaluation(dataset, predictions, output_dir):
         gt_difficults.append(is_difficult.astype(np.bool))
 
         img_info = dataset.get_img_info(i)
+        prediction = predictions[i]
         prediction = prediction.resize((img_info['width'], img_info['height'])).numpy()
         boxes, labels, scores = prediction['boxes'], prediction['labels'], prediction['scores']
 

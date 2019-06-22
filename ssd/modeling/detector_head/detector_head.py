@@ -1,8 +1,8 @@
-import torch
 from torch import nn
 import torch.nn.functional as F
 
 from ssd.modeling.anchors.prior_box import PriorBox
+from ssd.modeling.detector_head.predictor import make_predictor
 from ssd.utils import box_utils
 from .inference import PostProcessor
 from .loss import MultiBoxLoss
@@ -12,15 +12,7 @@ class SSDHeader(nn.Module):
     def __init__(self, cfg):
         super().__init__()
         self.cfg = cfg
-        self.cls_headers = nn.ModuleList()
-        self.reg_headers = nn.ModuleList()
-        for boxes_per_location, out_channels in zip(cfg.MODEL.PRIORS.BOXES_PER_LOCATION, cfg.MODEL.BACKBONE.OUT_CHANNELS):
-            self.cls_headers.append(
-                nn.Conv2d(out_channels, boxes_per_location * cfg.MODEL.NUM_CLASSES, kernel_size=3, stride=1, padding=1)
-            )
-            self.reg_headers.append(
-                nn.Conv2d(out_channels, boxes_per_location * 4, kernel_size=3, stride=1, padding=1)
-            )
+        self.predictor = make_predictor(cfg)
         self.loss_evaluator = MultiBoxLoss(neg_pos_ratio=cfg.MODEL.NEG_POS_RATIO)
         self.post_processor = PostProcessor(cfg)
         self.priors = None
@@ -33,37 +25,28 @@ class SSDHeader(nn.Module):
                 nn.init.zeros_(m.bias)
 
     def forward(self, features, targets=None):
-        confidences = []
-        locations = []
-        for feature, cls_header, reg_header in zip(features, self.cls_headers, self.reg_headers):
-            confidences.append(cls_header(feature).permute(0, 2, 3, 1).contiguous())
-            locations.append(reg_header(feature).permute(0, 2, 3, 1).contiguous())
-
-        batch_size = features[0].shape[0]
-        confidences = torch.cat([c.view(c.shape[0], -1) for c in confidences], dim=1).view(batch_size, -1, self.cfg.MODEL.NUM_CLASSES)
-        locations = torch.cat([l.view(l.shape[0], -1) for l in locations], dim=1).view(batch_size, -1, 4)
-
+        cls_logits, bbox_pred = self.predictor(features)
         if self.training:
-            return self._forward_train(confidences, locations, targets)
+            return self._forward_train(cls_logits, bbox_pred, targets)
         else:
-            return self._forward_test(confidences, locations)
+            return self._forward_test(cls_logits, bbox_pred)
 
-    def _forward_train(self, confidences, locations, targets):
+    def _forward_train(self, cls_logits, bbox_pred, targets):
         gt_boxes, gt_labels = targets['boxes'], targets['labels']
-        reg_loss, cls_loss = self.loss_evaluator(confidences, locations, gt_labels, gt_boxes)
+        reg_loss, cls_loss = self.loss_evaluator(cls_logits, bbox_pred, gt_labels, gt_boxes)
         loss_dict = dict(
             reg_loss=reg_loss,
             cls_loss=cls_loss,
         )
-        detections = (confidences, locations)
+        detections = (cls_logits, bbox_pred)
         return detections, loss_dict
 
-    def _forward_test(self, confidences, locations):
+    def _forward_test(self, cls_logits, bbox_pred):
         if self.priors is None:
-            self.priors = PriorBox(self.cfg)().to(locations.device)
-        scores = F.softmax(confidences, dim=2)
+            self.priors = PriorBox(self.cfg)().to(bbox_pred.device)
+        scores = F.softmax(cls_logits, dim=2)
         boxes = box_utils.convert_locations_to_boxes(
-            locations, self.priors, self.cfg.MODEL.CENTER_VARIANCE, self.cfg.MODEL.SIZE_VARIANCE
+            bbox_pred, self.priors, self.cfg.MODEL.CENTER_VARIANCE, self.cfg.MODEL.SIZE_VARIANCE
         )
         boxes = box_utils.center_form_to_corner_form(boxes)
         detections = (scores, boxes)

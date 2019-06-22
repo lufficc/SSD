@@ -8,6 +8,8 @@ class PostProcessor:
     def __init__(self, cfg):
         super().__init__()
         self.cfg = cfg
+        self.width = cfg.INPUT.IMAGE_SIZE
+        self.height = cfg.INPUT.IMAGE_SIZE
 
     def __call__(self, detections):
         batches_scores, batches_boxes = detections
@@ -19,19 +21,22 @@ class PostProcessor:
             processed_scores = []
             processed_labels = []
 
-            scores, boxes = batches_scores[batch_id], batches_boxes[batch_id]  # (N, #CLS) (N, 4)
-            for class_id in range(1, scores.size(1)):  # skip background
-                per_cls_scores = scores[:, class_id]
-                mask = per_cls_scores > self.cfg.TEST.CONFIDENCE_THRESHOLD
-                per_cls_scores = per_cls_scores[mask]
-                if per_cls_scores.numel() == 0:
+            per_img_scores, per_img_boxes = batches_scores[batch_id], batches_boxes[batch_id]  # (N, #CLS) (N, 4)
+            for class_id in range(1, per_img_scores.size(1)):  # skip background
+                scores = per_img_scores[:, class_id]
+                mask = scores > self.cfg.TEST.CONFIDENCE_THRESHOLD
+                scores = scores[mask]
+                if scores.size(0) == 0:
                     continue
-                per_cls_boxes = boxes[mask, :] * self.cfg.INPUT.IMAGE_SIZE
-                keep = boxes_nms(per_cls_boxes, per_cls_scores, self.cfg.TEST.NMS_THRESHOLD, self.cfg.TEST.MAX_PER_CLASS)
+                boxes = per_img_boxes[mask, :]
+                boxes[:, 0::2] *= self.width
+                boxes[:, 1::2] *= self.height
 
-                nmsed_boxes = per_cls_boxes[keep, :]
+                keep = boxes_nms(boxes, scores, self.cfg.TEST.NMS_THRESHOLD, self.cfg.TEST.MAX_PER_CLASS)
+
+                nmsed_boxes = boxes[keep, :]
                 nmsed_labels = torch.tensor([class_id] * keep.size(0), device=device)
-                nmsed_scores = per_cls_scores[keep]
+                nmsed_scores = scores[keep]
 
                 processed_boxes.append(nmsed_boxes)
                 processed_scores.append(nmsed_scores)
@@ -46,8 +51,13 @@ class PostProcessor:
                 processed_labels = torch.cat(processed_labels, 0)
                 processed_scores = torch.cat(processed_scores, 0)
 
+            if processed_boxes.size(0) > self.cfg.TEST.MAX_PER_IMAGE > 0:
+                processed_scores, keep = torch.topk(processed_scores, k=self.cfg.TEST.MAX_PER_IMAGE)
+                processed_boxes = processed_boxes[keep, :]
+                processed_labels = processed_labels[keep]
+
             container = Container(boxes=processed_boxes, labels=processed_labels, scores=processed_scores)
-            container.img_width = self.cfg.INPUT.IMAGE_SIZE
-            container.img_height = self.cfg.INPUT.IMAGE_SIZE
+            container.img_width = self.width
+            container.img_height = self.height
             results.append(container)
         return results

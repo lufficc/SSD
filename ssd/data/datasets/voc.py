@@ -48,13 +48,6 @@ class VOCDataset(torch.utils.data.Dataset):
         )
         return image, targets, index
 
-    def get_image(self, index):
-        image_id = self.ids[index]
-        image = self._read_image(image_id)
-        if self.transform:
-            image, _ = self.transform(image)
-        return image
-
     def get_annotation(self, index):
         image_id = self.ids[index]
         return image_id, self._get_annotation(image_id)

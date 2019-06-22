@@ -115,12 +115,12 @@ def do_train(cfg, model,
 
         if args.eval_step > 0 and iteration % args.eval_step == 0 and not iteration == max_iter:
             eval_results = do_evaluation(cfg, model, distributed=args.distributed)
-            if dist_util.get_rank() and summary_writer:
+            if dist_util.get_rank() == 0 and summary_writer:
                 for eval_result, dataset in zip(eval_results, cfg.DATASETS.TEST):
                     write_metric(eval_result['metrics'], 'metrics/' + dataset, summary_writer, iteration)
             model.train()
 
-    checkpointer.save("model_final.pth", **arguments)
+    checkpointer.save("model_final", **arguments)
     # compute training time
     total_training_time = int(time.time() - start_training_time)
     total_time_str = str(datetime.timedelta(seconds=total_training_time))

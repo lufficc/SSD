@@ -1,11 +1,6 @@
-from typing import Mapping
-
-from matplotlib import collections
-
-
 class Container:
-    def __init__(self, **kwargs):
-        self._data_dict = {**kwargs}
+    def __init__(self, *args, **kwargs):
+        self._data_dict = dict(*args, **kwargs)
 
     def __setattr__(self, key, value):
         object.__setattr__(self, key, value)
@@ -36,13 +31,20 @@ class Container:
         return self
 
     def resize(self, size):
+        """resize boxes
+        Args:
+            size: (width, height)
+        Returns:
+            self
+        """
         img_width = getattr(self, 'img_width', -1)
         img_height = getattr(self, 'img_height', -1)
-        if img_width > 0 and img_height > 0:
-            new_width, new_height = size
-            if 'boxes' in self._data_dict:
-                self._data_dict['boxes'][:, 0::2] = self._data_dict['boxes'][:, 0::2] / img_width * new_width
-                self._data_dict['boxes'][:, 1::2] = self._data_dict['boxes'][:, 1::2] / img_height * new_height
+        assert img_width > 0 and img_height > 0
+        assert 'boxes' in self._data_dict
+        boxes = self._data_dict['boxes']
+        new_width, new_height = size
+        boxes[:, 0::2] *= (new_width / img_width)
+        boxes[:, 1::2] *= (new_height / img_height)
         return self
 
     def __repr__(self):

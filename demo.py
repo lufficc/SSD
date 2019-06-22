@@ -17,6 +17,7 @@ from ssd.utils import mkdir
 from ssd.utils.checkpoint import CheckPointer
 
 
+@torch.no_grad()
 def run_demo(cfg, ckpt, score_threshold, images_dir, output_dir, dataset_type):
     if dataset_type == "voc":
         class_names = VOCDataset.class_names
@@ -40,9 +41,9 @@ def run_demo(cfg, ckpt, score_threshold, images_dir, output_dir, dataset_type):
     for image_path in tqdm(image_paths):
         image = np.array(Image.open(image_path).convert("RGB"))
         height, width, _ = image.shape
-        images = transforms(image).unsqueeze(0)
+        images = transforms(image)[0].unsqueeze(0)
 
-        result = model(images)[0]
+        result = model(images.to(device))[0]
         result = result.resize((width, height)).to(cpu_device).numpy()
         boxes, labels, scores = result['boxes'], result['labels'], result['scores']
 
@@ -54,7 +55,7 @@ def run_demo(cfg, ckpt, score_threshold, images_dir, output_dir, dataset_type):
 
         drawn_image = draw_boxes(image, boxes, labels, scores, class_names).astype(np.uint8)
         image_name = os.path.basename(image_path)
-        Image.fromarray(drawn_image).save(os.path.join(output_dir, image_name))
+        Image.fromarray(drawn_image).save(os.path.join(output_dir, '{}_demo.jpg'.format(image_name.split('.')[0])))
 
 
 def main():
