@@ -8,6 +8,7 @@ import torch.distributed as dist
 
 from ssd.engine.inference import do_evaluation
 from ssd.utils import dist_util
+from ssd.utils.metric_logger import MetricLogger
 
 
 def write_metric(eval_result, prefix, summary_writer, global_step):
@@ -54,7 +55,9 @@ def do_train(cfg, model,
              arguments,
              args):
     logger = logging.getLogger("SSD.trainer")
-    logger.info("Start training...")
+    logger.info("Start training ...")
+    meters = MetricLogger()
+
     model.train()
     save_to_disk = dist_util.get_rank() == 0
     if args.use_tensorboard and save_to_disk:
@@ -67,8 +70,6 @@ def do_train(cfg, model,
     max_iter = len(data_loader)
     start_iter = arguments["iteration"]
     start_training_time = time.time()
-    trained_time = 0
-    tic = time.time()
     end = time.time()
     for iteration, (images, targets, _) in enumerate(data_loader, start_iter):
         iteration = iteration + 1
@@ -78,39 +79,44 @@ def do_train(cfg, model,
         images = images.to(device)
         targets = targets.to(device)
         loss_dict = model(images, targets=targets)
+        loss = sum(loss for loss in loss_dict.values())
 
         # reduce losses over all GPUs for logging purposes
         loss_dict_reduced = reduce_loss_dict(loss_dict)
         losses_reduced = sum(loss for loss in loss_dict_reduced.values())
-        loss = sum(loss for loss in loss_dict.values())
+        meters.update(total_loss=losses_reduced, **loss_dict_reduced)
 
         optimizer.zero_grad()
         loss.backward()
         optimizer.step()
 
-        trained_time += time.time() - end
+        batch_time = time.time() - end
         end = time.time()
+        meters.update(time=batch_time)
         if iteration % args.log_step == 0:
-            eta_seconds = int((trained_time / iteration) * (max_iter - iteration))
-            log_str = [
-                "iter: {:06d}, lr: {:.5f}, cost: {:.2f}s, eta: {}".format(iteration,
-                                                                          optimizer.param_groups[0]['lr'],
-                                                                          time.time() - tic, str(datetime.timedelta(seconds=eta_seconds))),
-                "total_loss: {:.3f}".format(losses_reduced.item())
-            ]
-            for loss_name, loss_item in loss_dict_reduced.items():
-                log_str.append("{}: {:.3f}".format(loss_name, loss_item.item()))
-            log_str = ', '.join(log_str)
-            # TODO: use MetricLogger to log
-            logger.info(log_str)
+            eta_seconds = meters.time.global_avg * (max_iter - iteration)
+            eta_string = str(datetime.timedelta(seconds=int(eta_seconds)))
+            logger.info(
+                meters.delimiter.join([
+                    "iter: {iter:06d}",
+                    "lr: {lr:.5f}",
+                    '{meters}',
+                    "eta: {eta}",
+                    'mem: {mem}M',
+                ]).format(
+                    iter=iteration,
+                    lr=optimizer.param_groups[0]['lr'],
+                    meters=str(meters),
+                    eta=eta_string,
+                    mem=round(torch.cuda.max_memory_allocated() / 1024.0 / 1024.0),
+                )
+            )
             if summary_writer:
                 global_step = iteration
                 summary_writer.add_scalar('losses/total_loss', losses_reduced, global_step=global_step)
                 for loss_name, loss_item in loss_dict_reduced.items():
                     summary_writer.add_scalar('losses/{}'.format(loss_name), loss_item, global_step=global_step)
                 summary_writer.add_scalar('lr', optimizer.param_groups[0]['lr'], global_step=global_step)
-
-            tic = time.time()
 
         if iteration % args.save_step == 0:
             checkpointer.save("model_{:06d}".format(iteration), **arguments)
@@ -120,7 +126,7 @@ def do_train(cfg, model,
             if dist_util.get_rank() == 0 and summary_writer:
                 for eval_result, dataset in zip(eval_results, cfg.DATASETS.TEST):
                     write_metric(eval_result['metrics'], 'metrics/' + dataset, summary_writer, iteration)
-            model.train()
+            model.train()  # *IMPORTANT*: change to train mode after eval.
 
     checkpointer.save("model_final", **arguments)
     # compute training time
