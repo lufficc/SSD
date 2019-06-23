@@ -74,19 +74,20 @@ def do_train(cfg, model,
         iteration = iteration + 1
         arguments["iteration"] = iteration
         scheduler.step()
+
         images = images.to(device)
         targets = targets.to(device)
-
-        optimizer.zero_grad()
         loss_dict = model(images, targets=targets)
 
         # reduce losses over all GPUs for logging purposes
         loss_dict_reduced = reduce_loss_dict(loss_dict)
         losses_reduced = sum(loss for loss in loss_dict_reduced.values())
-
         loss = sum(loss for loss in loss_dict.values())
+
+        optimizer.zero_grad()
         loss.backward()
         optimizer.step()
+
         trained_time += time.time() - end
         end = time.time()
         if iteration % args.log_step == 0:
@@ -100,6 +101,7 @@ def do_train(cfg, model,
             for loss_name, loss_item in loss_dict_reduced.items():
                 log_str.append("{}: {:.3f}".format(loss_name, loss_item.item()))
             log_str = ', '.join(log_str)
+            # TODO: use MetricLogger to log
             logger.info(log_str)
             if summary_writer:
                 global_step = iteration
