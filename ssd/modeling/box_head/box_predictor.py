@@ -1,6 +1,7 @@
 import torch
 from torch import nn
 
+from ssd.layers import SeparableConv2d
 from ssd.modeling import registry
 
 
@@ -48,16 +49,6 @@ class SSDBoxPredictor(BoxPredictor):
 
     def reg_block(self, level, out_channels, boxes_per_location):
         return nn.Conv2d(out_channels, boxes_per_location * 4, kernel_size=3, stride=1, padding=1)
-
-
-def SeparableConv2d(in_channels, out_channels, kernel_size=1, stride=1, padding=0, onnx_compatible=False):
-    ReLU = nn.ReLU if onnx_compatible else nn.ReLU6
-    return nn.Sequential(
-        nn.Conv2d(in_channels=in_channels, out_channels=in_channels, kernel_size=kernel_size, groups=in_channels, stride=stride, padding=padding),
-        nn.BatchNorm2d(in_channels),
-        ReLU(),
-        nn.Conv2d(in_channels=in_channels, out_channels=out_channels, kernel_size=1),
-    )
 
 
 @registry.BOX_PREDICTORS.register('SSDLiteBoxPredictor')
