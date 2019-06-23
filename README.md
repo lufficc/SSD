@@ -121,14 +121,14 @@ Where `COCO_ROOT` default is `datasets` folder in current project, you can creat
 
 ```bash
 # for example, train SSD300:
-python train_ssd.py --config-file configs/ssd300_voc0712.yaml --vgg vgg16_reducedfc.pth
+python train.py --config-file configs/vgg_ssd300_voc0712.yaml
 ```
 ### Multi-GPU training
 
 ```bash
 # for example, train SSD300 with 4 GPUs:
 export NGPUS=4
-python -m torch.distributed.launch --nproc_per_node=$NGPUS train_ssd.py --config-file configs/ssd300_voc0712.yaml --vgg vgg16_reducedfc.pth
+python -m torch.distributed.launch --nproc_per_node=$NGPUS train.py --config-file configs/vgg_ssd300_voc0712.yaml
 ```
 The configuration files that I provide assume that we are running on single GPU. When changing number of GPUs, hyper-parameter (lr, max_iter, ...) will also changed according to this paper: [Accurate, Large Minibatch SGD: Training ImageNet in 1 Hour](https://arxiv.org/abs/1706.02677).
 The pre-trained vgg weights can be downloaded here: https://s3.amazonaws.com/amdegroot-models/vgg16_reducedfc.pth.
@@ -139,7 +139,7 @@ The pre-trained vgg weights can be downloaded here: https://s3.amazonaws.com/amd
 
 ```bash
 # for example, evaluate SSD300:
-python eval_ssd.py --config-file configs/ssd300_voc0712.yaml --weights /path/to/trained_ssd300_weights.pth
+python test.py --config-file configs/vgg_ssd300_voc0712.yaml
 ```
 
 ### Multi-GPU evaluating
@@ -147,14 +147,14 @@ python eval_ssd.py --config-file configs/ssd300_voc0712.yaml --weights /path/to/
 ```bash
 # for example, evaluate SSD300 with 4 GPUs:
 export NGPUS=4
-python -m torch.distributed.launch --nproc_per_node=$NGPUS eval_ssd.py --config-file configs/ssd300_voc0712.yaml --weights /path/to/trained_ssd300_weights.pth
+python -m torch.distributed.launch --nproc_per_node=$NGPUS test.py --config-file configs/vgg_ssd300_voc0712.yaml
 ```
 
 ## Demo
 
 Predicting image in a folder is simple:
 ```bash
-python demo.py --config-file configs/ssd300_voc0712.yaml --weights path/to/trained/weights.pth --images_dir demo
+python demo.py --config-file configs/ssd300_voc0712.yaml --images_dir demo
 ```
 Then the predicted images with boxes, scores and label names will saved to `demo/result` folder.
 
@@ -181,80 +181,6 @@ Currently, I provide weights trained as follows:
 |  Train  |     07+12    |          trainval35k                     |
 | SSD300* |     77.8     |          25.5                            |
 | SSD512* |     80.2     |          -                               |
-
-### Details:
-
-<table>
-<thead>
-<tr>
-<th></th>
-<th>VOC2007 test</th>
-<th>COCO 2014 minival</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>SSD300*</td>
-<td><pre><code>mAP: 0.7783
-aeroplane       : 0.8252
-bicycle         : 0.8445
-bird            : 0.7597
-boat            : 0.7102
-bottle          : 0.5275
-bus             : 0.8643
-car             : 0.8660
-cat             : 0.8741
-chair           : 0.6179
-cow             : 0.8279
-diningtable     : 0.7862
-dog             : 0.8519
-horse           : 0.8630
-motorbike       : 0.8515
-person          : 0.8024
-pottedplant     : 0.5079
-sheep           : 0.7685
-sofa            : 0.7926
-train           : 0.8704
-tvmonitor       : 0.7554</code></pre></td>
-<td><pre><code>Average Precision  (AP) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.229
-Average Precision  (AP) @[ IoU=0.50      | area=   all | maxDets=100 ] = 0.388
-Average Precision  (AP) @[ IoU=0.75      | area=   all | maxDets=100 ] = 0.240
-Average Precision  (AP) @[ IoU=0.50:0.95 | area= small | maxDets=100 ] = 0.068
-Average Precision  (AP) @[ IoU=0.50:0.95 | area=medium | maxDets=100 ] = 0.244
-Average Precision  (AP) @[ IoU=0.50:0.95 | area= large | maxDets=100 ] = 0.366
-Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=  1 ] = 0.231
-Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets= 10 ] = 0.336
-Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.368
-Average Recall     (AR) @[ IoU=0.50:0.95 | area= small | maxDets=100 ] = 0.150
-Average Recall     (AR) @[ IoU=0.50:0.95 | area=medium | maxDets=100 ] = 0.404
-Average Recall     (AR) @[ IoU=0.50:0.95 | area= large | maxDets=100 ] = 0.522</code></pre></td>
-</tr>
-<tr>
-<td>SSD512*</td>
-<td><pre><code>mAP: 0.8025
-aeroplane       : 0.8582
-bicycle         : 0.8710
-bird            : 0.8192
-boat            : 0.7410
-bottle          : 0.5894
-bus             : 0.8755
-car             : 0.8856
-cat             : 0.8926
-chair           : 0.6589
-cow             : 0.8634
-diningtable     : 0.7676
-dog             : 0.8707
-horse           : 0.8806
-motorbike       : 0.8512
-person          : 0.8316
-pottedplant     : 0.5238
-sheep           : 0.8191
-sofa            : 0.7915
-train           : 0.8735
-tvmonitor       : 0.7866</code></pre></td>
-<td><pre><code>-</code></pre></td>
-</tr>
-</tbody></table>
 
 ## Troubleshooting
 If you have issues running or compiling this code, we have compiled a list of common issues in [TROUBLESHOOTING.md](TROUBLESHOOTING.md). If your issue is not present there, please feel free to open a new issue.
