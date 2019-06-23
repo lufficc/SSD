@@ -14,6 +14,9 @@ _C.MODEL.NEG_POS_RATIO = 3
 _C.MODEL.CENTER_VARIANCE = 0.1
 _C.MODEL.SIZE_VARIANCE = 0.2
 
+# ---------------------------------------------------------------------------- #
+# Backbone
+# ---------------------------------------------------------------------------- #
 _C.MODEL.BACKBONE = CN()
 _C.MODEL.BACKBONE.NAME = 'vgg'
 _C.MODEL.BACKBONE.OUT_CHANNELS = (512, 1024, 512, 256, 256, 256)
@@ -50,6 +53,14 @@ _C.DATASETS = CN()
 _C.DATASETS.TRAIN = ()
 # List of the dataset names for testing, as present in paths_catalog.py
 _C.DATASETS.TEST = ()
+
+# -----------------------------------------------------------------------------
+# DataLoader
+# -----------------------------------------------------------------------------
+_C.DATA_LOADER = CN()
+# Number of data loading threads
+_C.DATA_LOADER.NUM_WORKERS = 4
+_C.DATA_LOADER.PIN_MEMORY = True
 
 # ---------------------------------------------------------------------------- #
 # Solver
