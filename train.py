@@ -5,7 +5,7 @@ import os
 import torch
 import torch.distributed as dist
 
-from eval_ssd import do_evaluation
+from ssd.engine.inference import do_evaluation
 from ssd.config import cfg
 from ssd.data.build import make_data_loader
 from ssd.engine.trainer import do_train

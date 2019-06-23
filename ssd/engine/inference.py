@@ -4,9 +4,11 @@ import os
 import torch
 import torch.utils.data
 from tqdm import tqdm
+
+from ssd.data.build import make_data_loader
 from ssd.data.datasets.evaluation import evaluate
 
-from ssd.utils import dist_util
+from ssd.utils import dist_util, mkdir
 from ssd.utils.dist_util import synchronize, is_main_process
 
 
@@ -63,3 +65,20 @@ def inference(model, data_loader, dataset_name, device, output_folder=None, use_
     if output_folder:
         torch.save(predictions, predictions_path)
     return evaluate(dataset=dataset, predictions=predictions, output_dir=output_folder)
+
+
+@torch.no_grad()
+def do_evaluation(cfg, model, distributed):
+    if isinstance(model, torch.nn.parallel.DistributedDataParallel):
+        model = model.module
+    model.eval()
+    device = torch.device(cfg.MODEL.DEVICE)
+    data_loaders_val = make_data_loader(cfg, is_train=False, distributed=distributed)
+    eval_results = []
+    for dataset_name, data_loader in zip(cfg.DATASETS.TEST, data_loaders_val):
+        output_folder = os.path.join(cfg.OUTPUT_DIR, "inference", dataset_name)
+        if not os.path.exists(output_folder):
+            mkdir(output_folder)
+        eval_result = inference(model, data_loader, dataset_name, device, output_folder)
+        eval_results.append(eval_result)
+    return eval_results

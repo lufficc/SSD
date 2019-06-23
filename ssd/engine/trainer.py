@@ -6,7 +6,7 @@ import time
 import torch
 import torch.distributed as dist
 
-from eval_ssd import do_evaluation
+from ssd.engine.inference import do_evaluation
 from ssd.utils import dist_util
 
 
