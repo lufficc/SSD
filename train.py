@@ -11,7 +11,7 @@ from ssd.data.build import make_data_loader
 from ssd.engine.trainer import do_train
 from ssd.modeling.detector import build_detection_model
 from ssd.solver.build import make_optimizer, make_lr_scheduler
-from ssd.utils import dist_util
+from ssd.utils import dist_util, mkdir
 from ssd.utils.checkpoint import CheckPointer
 from ssd.utils.dist_util import synchronize
 from ssd.utils.logger import setup_logger
@@ -85,13 +85,16 @@ def main():
         torch.distributed.init_process_group(backend="nccl", init_method="env://")
         synchronize()
 
-    logger = setup_logger("SSD", dist_util.get_rank())
-    logger.info("Using {} GPUs".format(num_gpus))
-    logger.info(args)
-
     cfg.merge_from_file(args.config_file)
     cfg.merge_from_list(args.opts)
     cfg.freeze()
+
+    if cfg.OUTPUT_DIR:
+        mkdir(cfg.OUTPUT_DIR)
+
+    logger = setup_logger("SSD", dist_util.get_rank(), cfg.OUTPUT_DIR)
+    logger.info("Using {} GPUs".format(num_gpus))
+    logger.info(args)
 
     logger.info("Loaded configuration file {}".format(args.config_file))
     with open(args.config_file, "r") as cf:

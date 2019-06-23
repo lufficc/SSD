@@ -47,4 +47,5 @@ def coco_evaluation(dataset, predictions, output_dir):
     metrics = {}
     for i, key in enumerate(keys):
         metrics[key] = coco_eval.stats[i]
+        logger.info('{:<10}: {}'.format(key, round(coco_eval.stats[i], 3)))
     return dict(metrics=metrics)
