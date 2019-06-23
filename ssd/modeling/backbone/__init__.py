@@ -2,7 +2,7 @@ from ssd.modeling import registry
 from .vgg import VGG
 from .mobilenet import MobileNetV2
 
-__all__ = ['VGG', 'MobileNetV2']
+__all__ = ['build_backbone', 'VGG', 'MobileNetV2']
 
 
 def build_backbone(cfg):
