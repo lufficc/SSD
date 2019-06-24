@@ -1,9 +1,10 @@
 import json
 import logging
 import os
+from datetime import datetime
 
 
-def coco_evaluation(dataset, predictions, output_dir):
+def coco_evaluation(dataset, predictions, output_dir, iteration=None):
     coco_results = []
     for i, prediction in enumerate(predictions):
         img_info = dataset.get_img_info(i)
@@ -43,9 +44,19 @@ def coco_evaluation(dataset, predictions, output_dir):
     coco_eval.accumulate()
     coco_eval.summarize()
 
+    result_strings = []
     keys = ["AP", "AP50", "AP75", "APs", "APm", "APl"]
     metrics = {}
     for i, key in enumerate(keys):
         metrics[key] = coco_eval.stats[i]
         logger.info('{:<10}: {}'.format(key, round(coco_eval.stats[i], 3)))
+        result_strings.append('{:<10}: {}'.format(key, round(coco_eval.stats[i], 3)))
+
+    if iteration is not None:
+        result_path = os.path.join(output_dir, 'result_{:07d}.txt'.format(iteration))
+    else:
+        result_path = os.path.join(output_dir, 'result_{}.txt'.format(datetime.now().strftime('%Y-%m-%d_%H-%M-%S')))
+    with open(result_path, "w") as f:
+        f.write('\n'.join(result_strings))
+
     return dict(metrics=metrics)

@@ -3,7 +3,7 @@ from .coco import coco_evaluation
 from .voc import voc_evaluation
 
 
-def evaluate(dataset, predictions, output_dir):
+def evaluate(dataset, predictions, output_dir, **kwargs):
     """evaluate dataset using different methods based on dataset type.
     Args:
         dataset: Dataset object
@@ -14,7 +14,7 @@ def evaluate(dataset, predictions, output_dir):
         evaluation result
     """
     args = dict(
-        dataset=dataset, predictions=predictions, output_dir=output_dir
+        dataset=dataset, predictions=predictions, output_dir=output_dir, **kwargs,
     )
     if isinstance(dataset, VOCDataset):
         return voc_evaluation(**args)

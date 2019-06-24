@@ -122,7 +122,7 @@ def do_train(cfg, model,
             checkpointer.save("model_{:06d}".format(iteration), **arguments)
 
         if args.eval_step > 0 and iteration % args.eval_step == 0 and not iteration == max_iter:
-            eval_results = do_evaluation(cfg, model, distributed=args.distributed)
+            eval_results = do_evaluation(cfg, model, distributed=args.distributed, iteration=iteration)
             if dist_util.get_rank() == 0 and summary_writer:
                 for eval_result, dataset in zip(eval_results, cfg.DATASETS.TEST):
                     write_metric(eval_result['metrics'], 'metrics/' + dataset, summary_writer, iteration)

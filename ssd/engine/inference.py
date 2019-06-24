@@ -49,7 +49,7 @@ def compute_on_dataset(model, data_loader, device):
     return results_dict
 
 
-def inference(model, data_loader, dataset_name, device, output_folder=None, use_cached=False):
+def inference(model, data_loader, dataset_name, device, output_folder=None, use_cached=False, **kwargs):
     dataset = data_loader.dataset
     logger = logging.getLogger("SSD.inference")
     logger.info("Evaluating {} dataset({} images):".format(dataset_name, len(dataset)))
@@ -64,11 +64,11 @@ def inference(model, data_loader, dataset_name, device, output_folder=None, use_
         return
     if output_folder:
         torch.save(predictions, predictions_path)
-    return evaluate(dataset=dataset, predictions=predictions, output_dir=output_folder)
+    return evaluate(dataset=dataset, predictions=predictions, output_dir=output_folder, **kwargs)
 
 
 @torch.no_grad()
-def do_evaluation(cfg, model, distributed):
+def do_evaluation(cfg, model, distributed, **kwargs):
     if isinstance(model, torch.nn.parallel.DistributedDataParallel):
         model = model.module
     model.eval()
@@ -79,6 +79,6 @@ def do_evaluation(cfg, model, distributed):
         output_folder = os.path.join(cfg.OUTPUT_DIR, "inference", dataset_name)
         if not os.path.exists(output_folder):
             mkdir(output_folder)
-        eval_result = inference(model, data_loader, dataset_name, device, output_folder)
+        eval_result = inference(model, data_loader, dataset_name, device, output_folder, **kwargs)
         eval_results.append(eval_result)
     return eval_results
