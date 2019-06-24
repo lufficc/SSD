@@ -4,8 +4,12 @@ import os
 import torch
 from torch.nn.parallel import DistributedDataParallel
 
+from ssd.utils.model_zoo import cache_url
+
 
 class CheckPointer:
+    _last_checkpoint_name = 'last_checkpoint.txt'
+
     def __init__(self,
                  model,
                  optimizer=None,
@@ -56,7 +60,7 @@ class CheckPointer:
             return {}
 
         self.logger.info("Loading checkpoint from {}".format(f))
-        checkpoint = torch.load(f, map_location=torch.device("cpu"))
+        checkpoint = self._load_file(f)
         model = self.model
         if isinstance(model, DistributedDataParallel):
             model = self.model.module
@@ -73,7 +77,7 @@ class CheckPointer:
         return checkpoint
 
     def get_checkpoint_file(self):
-        save_file = os.path.join(self.save_dir, "last_checkpoint.txt")
+        save_file = os.path.join(self.save_dir, self._last_checkpoint_name)
         try:
             with open(save_file, "r") as f:
                 last_saved = f.read()
@@ -85,10 +89,19 @@ class CheckPointer:
         return last_saved
 
     def has_checkpoint(self):
-        save_file = os.path.join(self.save_dir, "last_checkpoint.txt")
+        save_file = os.path.join(self.save_dir, self._last_checkpoint_name)
         return os.path.exists(save_file)
 
     def tag_last_checkpoint(self, last_filename):
-        save_file = os.path.join(self.save_dir, "last_checkpoint.txt")
+        save_file = os.path.join(self.save_dir, self._last_checkpoint_name)
         with open(save_file, "w") as f:
             f.write(last_filename)
+
+    def _load_file(self, f):
+        # download url files
+        if f.startswith("http"):
+            # if the file is a url path, download it and cache it
+            cached_f = cache_url(f)
+            self.logger.info("url {} cached in {}".format(f, cached_f))
+            f = cached_f
+        return torch.load(f, map_location=torch.device("cpu"))
