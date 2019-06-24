@@ -67,4 +67,4 @@ class SSDLiteBoxPredictor(BoxPredictor):
 
 
 def make_box_predictor(cfg):
-    return registry.BOX_PREDICTORS[cfg.MODEL.PREDICTOR](cfg)
+    return registry.BOX_PREDICTORS[cfg.MODEL.BOX_PREDICTOR](cfg)
