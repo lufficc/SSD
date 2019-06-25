@@ -1,4 +1,9 @@
 class Container:
+    """
+    Help class from manage boxes, labels, etc...
+    Not inherit dict due to `default_collate` will modify dict's subclass to dict.
+    """
+
     def __init__(self, *args, **kwargs):
         self._data_dict = dict(*args, **kwargs)
 
@@ -14,21 +19,19 @@ class Container:
     def __setitem__(self, key, value):
         self._data_dict[key] = value
 
-    def to(self, *args, **kwargs):
+    def _call(self, name, *args, **kwargs):
         keys = list(self._data_dict.keys())
         for key in keys:
             value = self._data_dict[key]
-            if hasattr(value, 'to'):
-                self._data_dict[key] = value.to(*args, **kwargs)
+            if hasattr(value, name):
+                self._data_dict[key] = getattr(value, name)(*args, **kwargs)
         return self
 
+    def to(self, *args, **kwargs):
+        return self._call('to', *args, **kwargs)
+
     def numpy(self):
-        keys = list(self._data_dict.keys())
-        for key in keys:
-            value = self._data_dict[key]
-            if hasattr(value, 'numpy'):
-                self._data_dict[key] = value.numpy()
-        return self
+        return self._call('numpy')
 
     def resize(self, size):
         """resize boxes
