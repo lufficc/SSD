@@ -14,14 +14,14 @@ This repository implements [SSD (Single Shot MultiBox Detector)](https://arxiv.o
 
 ## Highlights
 
-- PyTorch 1.0
-- GPU/CPU NMS
-- Multi-GPU training and inference
-- Modular
-- Visualization(Support Tensorboard)
-- CPU support for inference
-- Evaluating during training
-- Metrics Visualization
+- **PyTorch 1.0**: Support PyTorch 1.0 or higher.
+- **Multi-GPU training and inference**: We use `DistributedDataParallel`, you can train or test with arbitrary GPU(s), the training schema will change accordingly.
+- **Modular**: And you own modules without pain.We abstract `backbone`,`Detector`, `BoxHead`, `BoxPredictor` etc... You can replace every component with your own code without change the code base.For example, You can add EfficientNet as backbone with change code, just add `efficient_net.py` and register it, specific it in the config file, It's done!
+- **CPU support for inference**: runs on CPU in inference time.
+- *Smooth and enjoyable training procedure*: we save the state of model, optimizer, scheduler, training iter, you can stop your training and resume training exactly from the save point without change your training `CMD`.
+- **Batched inference**: can perform inference using multiple images per batch per GPU
+- **Evaluating during training**: eval you model every `eval_step` to check performance improving or not.
+- **Metrics Visualization**: visualize metrics details in tensorboard, like AP, APl, APm and APs for COCO dataset or mAP and 20 categories' AP for VOC dataset.
 
 ## Installation
 ### Requirements

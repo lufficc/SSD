@@ -1,7 +1,7 @@
 class Container:
     """
-    Help class from manage boxes, labels, etc...
-    Not inherit dict due to `default_collate` will modify dict's subclass to dict.
+    Help class for manage boxes, labels, etc...
+    Not inherit dict due to `default_collate` will change dict's subclass to dict.
     """
 
     def __init__(self, *args, **kwargs):
