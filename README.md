@@ -16,10 +16,10 @@ This repository implements [SSD (Single Shot MultiBox Detector)](https://arxiv.o
 
 - **PyTorch 1.0**: Support PyTorch 1.0 or higher.
 - **Multi-GPU training and inference**: We use `DistributedDataParallel`, you can train or test with arbitrary GPU(s), the training schema will change accordingly.
-- **Modular**: And you own modules without pain.We abstract `backbone`,`Detector`, `BoxHead`, `BoxPredictor` etc... You can replace every component with your own code without change the code base.For example, You can add EfficientNet as backbone with change code, just add `efficient_net.py` and register it, specific it in the config file, It's done!
+- **Modular**: And you own modules without pain. We abstract `backbone`,`Detector`, `BoxHead`, `BoxPredictor`, etc. You can replace every component with your own code without change the code base. For example, You can add [EfficientNet](https://github.com/lukemelas/EfficientNet-PyTorch) as backbone, just add `efficient_net.py` and register it, specific it in the config file, It's done!
 - **CPU support for inference**: runs on CPU in inference time.
-- *Smooth and enjoyable training procedure*: we save the state of model, optimizer, scheduler, training iter, you can stop your training and resume training exactly from the save point without change your training `CMD`.
-- **Batched inference**: can perform inference using multiple images per batch per GPU
+- **Smooth and enjoyable training procedure**: we save the state of model, optimizer, scheduler, training iter, you can stop your training and resume training exactly from the save point without change your training `CMD`.
+- **Batched inference**: can perform inference using multiple images per batch per GPU.
 - **Evaluating during training**: eval you model every `eval_step` to check performance improving or not.
 - **Metrics Visualization**: visualize metrics details in tensorboard, like AP, APl, APm and APs for COCO dataset or mAP and 20 categories' AP for VOC dataset.
 
@@ -27,27 +27,20 @@ This repository implements [SSD (Single Shot MultiBox Detector)](https://arxiv.o
 ### Requirements
 
 1. Python3
-1. PyTorch 1.0
+1. PyTorch 1.0 or higher
 1. yacs
+1. [Vizer](https://github.com/lufficc/Vizer)
 1. GCC >= 4.9
 1. OpenCV
+
 
 ### Step-by-step installation
 
 ```bash
-# First, make sure that your conda is setup properly with the right environment
-# for that, check that `which conda`, `which pip` and `which python` points to the
-# right path. From a clean conda env, this is what you need to do.
-# But if you don't use conda, it's OK. Just pip install necessary packages.
-
-conda create --name SSD
-source activate SSD
-
-# follow PyTorch installation in https://pytorch.org/get-started/locally/
-conda install pytorch torchvision -c pytorch
-
-pip install yacs tqdm
-conda install opencv
+git clone https://github.com/lufficc/SSD.git
+cd SSD
+#Required packages
+pip install torch torchvision yacs tqdm opencv-python vizer
 
 # Optional packages
 # If you want visualize loss curve. Default is enabled. Disable by using --use_tensorboard 0 when training.
@@ -58,14 +51,11 @@ cd ~/github
 git clone https://github.com/cocodataset/cocoapi.git
 cd cocoapi/PythonAPI
 python setup.py build_ext install
-
-# Finally, download the pre-trained vgg weights.
-wget https://s3.amazonaws.com/amdegroot-models/vgg16_reducedfc.pth
 ```
 
 ### Build
 
-NMS build is not necessary, as we provide a python-like nms, but is 2x slower than build-version.
+NMS build is not necessary, as we provide a python-like nms, but is very slower than build-version.
 ```bash
 # For faster inference you need to build nms, this is needed when evaluating. Only training doesn't need this.
 cd ext
@@ -157,13 +147,6 @@ Predicting image in a folder is simple:
 python demo.py --config-file configs/ssd300_voc0712.yaml --images_dir demo
 ```
 Then the predicted images with boxes, scores and label names will saved to `demo/result` folder.
-
-Currently, I provide weights trained as follows:
-
-|         |    Weights   |
-| :-----: | :----------: |
-| SSD300* | [ssd300_voc0712_mAP77.83.pth(100 MB)](https://github.com/lufficc/SSD/releases/download/v1.0.1/ssd300_voc0712_mAP77.83.pth) |
-| SSD512* | [ssd512_voc0712_mAP80.25.pth(104 MB)](https://github.com/lufficc/SSD/releases/download/v1.0.1/ssd512_voc0712_mAP80.25.pth) |
 
 ## Performance
 ### Origin Paper:
