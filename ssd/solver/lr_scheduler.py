@@ -1,18 +1,31 @@
-from torch.optim.lr_scheduler import MultiStepLR
+from bisect import bisect_right
+
+from torch.optim.lr_scheduler import _LRScheduler
 
 
-class WarmupMultiStepLR(MultiStepLR):
+class WarmupMultiStepLR(_LRScheduler):
     def __init__(self, optimizer, milestones, gamma=0.1, warmup_factor=1.0 / 3,
                  warmup_iters=500, last_epoch=-1):
+        if not list(milestones) == sorted(milestones):
+            raise ValueError(
+                "Milestones should be a list of" " increasing integers. Got {}",
+                milestones,
+            )
+
+        self.milestones = milestones
+        self.gamma = gamma
         self.warmup_factor = warmup_factor
         self.warmup_iters = warmup_iters
-        super().__init__(optimizer, milestones, gamma, last_epoch)
+        super().__init__(optimizer, last_epoch)
 
     def get_lr(self):
-        if self.last_epoch <= self.warmup_iters:
-            alpha = self.last_epoch / self.warmup_iters
+        warmup_factor = 1
+        if self.last_epoch < self.warmup_iters:
+            alpha = float(self.last_epoch) / self.warmup_iters
             warmup_factor = self.warmup_factor * (1 - alpha) + alpha
-            return [lr * warmup_factor for lr in self.base_lrs]
-        else:
-            lr = super().get_lr()
-        return lr
+        return [
+            base_lr
+            * warmup_factor
+            * self.gamma ** bisect_right(self.milestones, self.last_epoch)
+            for base_lr in self.base_lrs
+        ]

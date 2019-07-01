@@ -1,0 +1,18 @@
+MODEL:
+  NUM_CLASSES: 21
+  BACKBONE:
+    NAME: 'efficient_net-b3'
+    OUT_CHANNELS: (48, 136, 384, 256, 256, 256)
+INPUT:
+  IMAGE_SIZE: 300
+DATASETS:
+  TRAIN: ("voc_2007_trainval", "voc_2012_trainval")
+  TEST: ("voc_2007_test", )
+SOLVER:
+  MAX_ITER: 160000
+  LR_STEPS: [105000, 135000]
+  GAMMA: 0.1
+  BATCH_SIZE: 24
+  LR: 1e-3
+
+OUTPUT_DIR: 'outputs/efficient_net_b3_ssd300_voc0712'
