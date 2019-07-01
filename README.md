@@ -16,13 +16,13 @@ This repository implements [SSD (Single Shot MultiBox Detector)](https://arxiv.o
 
 - **PyTorch 1.0**: Support PyTorch 1.0 or higher.
 - **Multi-GPU training and inference**: We use `DistributedDataParallel`, you can train or test with arbitrary GPU(s), the training schema will change accordingly.
-- **Modular**: And you own modules without pain. We abstract `backbone`,`Detector`, `BoxHead`, `BoxPredictor`, etc. You can replace every component with your own code without change the code base. For example, You can add [EfficientNet](https://github.com/lukemelas/EfficientNet-PyTorch) as backbone, just add `efficient_net.py` and register it, specific it in the config file, It's done!
+- **Modular**: And you own modules without pain. We abstract `backbone`,`Detector`, `BoxHead`, `BoxPredictor`, etc. You can replace every component with your own code without change the code base. For example, You can add [EfficientNet](https://github.com/lukemelas/EfficientNet-PyTorch) as backbone, just add `efficient_net.py` (ALREADY ADDED) and register it, specific it in the config file, It's done!
 - **CPU support for inference**: runs on CPU in inference time.
 - **Smooth and enjoyable training procedure**: we save the state of model, optimizer, scheduler, training iter, you can stop your training and resume training exactly from the save point without change your training `CMD`.
 - **Batched inference**: can perform inference using multiple images per batch per GPU.
 - **Evaluating during training**: eval you model every `eval_step` to check performance improving or not.
 - **Metrics Visualization**: visualize metrics details in tensorboard, like AP, APl, APm and APs for COCO dataset or mAP and 20 categories' AP for VOC dataset.
-
+- **Auto download**: load pre-trained weights from URL and cache it.
 ## Installation
 ### Requirements
 
@@ -121,7 +121,6 @@ export NGPUS=4
 python -m torch.distributed.launch --nproc_per_node=$NGPUS train.py --config-file configs/vgg_ssd300_voc0712.yaml
 ```
 The configuration files that I provide assume that we are running on single GPU. When changing number of GPUs, hyper-parameter (lr, max_iter, ...) will also changed according to this paper: [Accurate, Large Minibatch SGD: Training ImageNet in 1 Hour](https://arxiv.org/abs/1706.02677).
-The pre-trained vgg weights can be downloaded here: https://s3.amazonaws.com/amdegroot-models/vgg16_reducedfc.pth.
 
 ## Evaluate
 
@@ -144,26 +143,34 @@ python -m torch.distributed.launch --nproc_per_node=$NGPUS test.py --config-file
 
 Predicting image in a folder is simple:
 ```bash
-python demo.py --config-file configs/ssd300_voc0712.yaml --images_dir demo
+python demo.py --config-file configs/vgg_ssd300_voc0712.yaml --images_dir demo
 ```
 Then the predicted images with boxes, scores and label names will saved to `demo/result` folder.
 
-## Performance
+## MODEL ZOO
 ### Origin Paper:
 
 |         | VOC2007 test | coco test-dev2015 |
 | :-----: | :----------: |   :----------:    |
-|  Train  |     07+12    |    trainval35k    |
 | SSD300* |     77.2     |      25.1         |
 | SSD512* |     79.8     |      28.8         |
 
-### Our Implementation:
+### COCO:
 
-|         | VOC2007 test |          COCO 2014 minival               |
-| :-----: | :----------: |   :----------------------------------:   |
-|  Train  |     07+12    |          trainval35k                     |
-| SSD300* |     77.8     |          25.5                            |
-| SSD512* |     80.2     |          -                               |
+| Backbone       | Input Size  |          box AP                  | Model Size |  Download |
+| :------------: | :----------:|   :--------------------------:   | :--------: | :-------: |
+|  VGG16         |     300     |          25.2                    |  274.5MB   |           |
+|  VGG16         |     512     |          xx.x                    |  xxx.xMB   |           |
+|  Mobilenet V2  |     320     |          xx.x                    |  xxx.xMB   |           |
+
+### PASCAL VOC:
+
+| Backbone         | Input Size  |          mAP                     | Model Size | Download  |
+| :--------------: | :----------:|   :--------------------------:   | :--------: | :-------: |
+|  VGG16           |     300     |          77.6                    |   210.3MB  |           |
+|  VGG16           |     512     |          xx.x                    |   xxx.xMB  |           |
+|  Mobilenet V2    |     320     |          68.8                    |   26.8MB   |           |
+|  EfficientNet-B3 |     300     |          73.9                    |   101.8MB  |           |
 
 ## Troubleshooting
 If you have issues running or compiling this code, we have compiled a list of common issues in [TROUBLESHOOTING.md](TROUBLESHOOTING.md). If your issue is not present there, please feel free to open a new issue.
