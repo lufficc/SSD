@@ -1,5 +1,7 @@
 MODEL:
   NUM_CLASSES: 21
+  BACKBONE:
+    OUT_CHANNELS: (512, 1024, 512, 256, 256, 256, 256)
   PRIORS:
     FEATURE_MAPS: [64, 32, 16, 8, 4, 2, 1]
     STRIDES: [8, 16, 32, 64, 128, 256, 512]
@@ -18,3 +20,5 @@ SOLVER:
   GAMMA: 0.1
   BATCH_SIZE: 24
   LR: 1e-3
+
+OUTPUT_DIR: 'outputs/vgg_ssd512_voc0712'

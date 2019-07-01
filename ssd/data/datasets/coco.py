@@ -3,6 +3,8 @@ import torch.utils.data
 import numpy as np
 from PIL import Image
 
+from ssd.structures.container import Container
+
 
 class COCODataset(torch.utils.data.Dataset):
     class_names = ('__background__',
@@ -47,14 +49,11 @@ class COCODataset(torch.utils.data.Dataset):
             image, boxes, labels = self.transform(image, boxes, labels)
         if self.target_transform:
             boxes, labels = self.target_transform(boxes, labels)
-        return image, boxes, labels
-
-    def get_image(self, index):
-        image_id = self.ids[index]
-        image = self._read_image(image_id)
-        if self.transform:
-            image, _ = self.transform(image)
-        return image
+        targets = Container(
+            boxes=boxes,
+            labels=labels,
+        )
+        return image, targets, index
 
     def get_annotation(self, index):
         image_id = self.ids[index]
@@ -79,6 +78,11 @@ class COCODataset(torch.utils.data.Dataset):
     def _xywh2xyxy(self, box):
         x1, y1, w, h = box
         return [x1, y1, x1 + w, y1 + h]
+
+    def get_img_info(self, index):
+        image_id = self.ids[index]
+        img_data = self.coco.imgs[image_id]
+        return img_data
 
     def _read_image(self, image_id):
         file_name = self.coco.loadImgs(image_id)[0]['file_name']

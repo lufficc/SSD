@@ -4,6 +4,8 @@ import numpy as np
 import xml.etree.ElementTree as ET
 from PIL import Image
 
+from ssd.structures.container import Container
+
 
 class VOCDataset(torch.utils.data.Dataset):
     class_names = ('__background__',
@@ -40,14 +42,11 @@ class VOCDataset(torch.utils.data.Dataset):
             image, boxes, labels = self.transform(image, boxes, labels)
         if self.target_transform:
             boxes, labels = self.target_transform(boxes, labels)
-        return image, boxes, labels
-
-    def get_image(self, index):
-        image_id = self.ids[index]
-        image = self._read_image(image_id)
-        if self.transform:
-            image, _ = self.transform(image)
-        return image
+        targets = Container(
+            boxes=boxes,
+            labels=labels,
+        )
+        return image, targets, index
 
     def get_annotation(self, index):
         image_id = self.ids[index]
@@ -86,6 +85,14 @@ class VOCDataset(torch.utils.data.Dataset):
         return (np.array(boxes, dtype=np.float32),
                 np.array(labels, dtype=np.int64),
                 np.array(is_difficult, dtype=np.uint8))
+
+    def get_img_info(self, index):
+        img_id = self.ids[index]
+        annotation_file = os.path.join(self.data_dir, "Annotations", "%s.xml" % img_id)
+        anno = ET.parse(annotation_file).getroot()
+        size = anno.find("size")
+        im_info = tuple(map(int, (size.find("height").text, size.find("width").text)))
+        return {"height": im_info[0], "width": im_info[1]}
 
     def _read_image(self, image_id):
         image_file = os.path.join(self.data_dir, "JPEGImages", "%s.jpg" % image_id)

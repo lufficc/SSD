@@ -11,3 +11,5 @@ SOLVER:
   GAMMA: 0.1
   BATCH_SIZE: 32
   LR: 1e-3
+
+OUTPUT_DIR: 'outputs/vgg_ssd300_voc0712'

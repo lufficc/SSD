@@ -14,40 +14,33 @@ This repository implements [SSD (Single Shot MultiBox Detector)](https://arxiv.o
 
 ## Highlights
 
-- PyTorch 1.0
-- GPU/CPU NMS
-- Multi-GPU training and inference
-- Modular
-- Visualization(Support Tensorboard)
-- CPU support for inference
-- Evaluating during training
-- Metrics Visualization
-
+- **PyTorch 1.0**: Support PyTorch 1.0 or higher.
+- **Multi-GPU training and inference**: We use `DistributedDataParallel`, you can train or test with arbitrary GPU(s), the training schema will change accordingly.
+- **Modular**: And you own modules without pain. We abstract `backbone`,`Detector`, `BoxHead`, `BoxPredictor`, etc. You can replace every component with your own code without change the code base. For example, You can add [EfficientNet](https://github.com/lukemelas/EfficientNet-PyTorch) as backbone, just add `efficient_net.py` (ALREADY ADDED) and register it, specific it in the config file, It's done!
+- **CPU support for inference**: runs on CPU in inference time.
+- **Smooth and enjoyable training procedure**: we save the state of model, optimizer, scheduler, training iter, you can stop your training and resume training exactly from the save point without change your training `CMD`.
+- **Batched inference**: can perform inference using multiple images per batch per GPU.
+- **Evaluating during training**: eval you model every `eval_step` to check performance improving or not.
+- **Metrics Visualization**: visualize metrics details in tensorboard, like AP, APl, APm and APs for COCO dataset or mAP and 20 categories' AP for VOC dataset.
+- **Auto download**: load pre-trained weights from URL and cache it.
 ## Installation
 ### Requirements
 
 1. Python3
-1. PyTorch 1.0
+1. PyTorch 1.0 or higher
 1. yacs
+1. [Vizer](https://github.com/lufficc/Vizer)
 1. GCC >= 4.9
 1. OpenCV
+
 
 ### Step-by-step installation
 
 ```bash
-# First, make sure that your conda is setup properly with the right environment
-# for that, check that `which conda`, `which pip` and `which python` points to the
-# right path. From a clean conda env, this is what you need to do.
-# But if you don't use conda, it's OK. Just pip install necessary packages.
-
-conda create --name SSD
-source activate SSD
-
-# follow PyTorch installation in https://pytorch.org/get-started/locally/
-conda install pytorch torchvision -c pytorch
-
-pip install yacs tqdm
-conda install opencv
+git clone https://github.com/lufficc/SSD.git
+cd SSD
+#Required packages
+pip install torch torchvision yacs tqdm opencv-python vizer
 
 # Optional packages
 # If you want visualize loss curve. Default is enabled. Disable by using --use_tensorboard 0 when training.
@@ -58,14 +51,11 @@ cd ~/github
 git clone https://github.com/cocodataset/cocoapi.git
 cd cocoapi/PythonAPI
 python setup.py build_ext install
-
-# Finally, download the pre-trained vgg weights.
-wget https://s3.amazonaws.com/amdegroot-models/vgg16_reducedfc.pth
 ```
 
 ### Build
 
-NMS build is not necessary, as we provide a python-like nms, but is 2x slower than build-version.
+NMS build is not necessary, as we provide a python-like nms, but is very slower than build-version.
 ```bash
 # For faster inference you need to build nms, this is needed when evaluating. Only training doesn't need this.
 cd ext
@@ -121,17 +111,16 @@ Where `COCO_ROOT` default is `datasets` folder in current project, you can creat
 
 ```bash
 # for example, train SSD300:
-python train_ssd.py --config-file configs/ssd300_voc0712.yaml --vgg vgg16_reducedfc.pth
+python train.py --config-file configs/vgg_ssd300_voc0712.yaml
 ```
 ### Multi-GPU training
 
 ```bash
 # for example, train SSD300 with 4 GPUs:
 export NGPUS=4
-python -m torch.distributed.launch --nproc_per_node=$NGPUS train_ssd.py --config-file configs/ssd300_voc0712.yaml --vgg vgg16_reducedfc.pth
+python -m torch.distributed.launch --nproc_per_node=$NGPUS train.py --config-file configs/vgg_ssd300_voc0712.yaml SOLVER.WARMUP_FACTOR 0.03333 SOLVER.WARMUP_ITERS 1000
 ```
 The configuration files that I provide assume that we are running on single GPU. When changing number of GPUs, hyper-parameter (lr, max_iter, ...) will also changed according to this paper: [Accurate, Large Minibatch SGD: Training ImageNet in 1 Hour](https://arxiv.org/abs/1706.02677).
-The pre-trained vgg weights can be downloaded here: https://s3.amazonaws.com/amdegroot-models/vgg16_reducedfc.pth.
 
 ## Evaluate
 
@@ -139,7 +128,7 @@ The pre-trained vgg weights can be downloaded here: https://s3.amazonaws.com/amd
 
 ```bash
 # for example, evaluate SSD300:
-python eval_ssd.py --config-file configs/ssd300_voc0712.yaml --weights /path/to/trained_ssd300_weights.pth
+python test.py --config-file configs/vgg_ssd300_voc0712.yaml
 ```
 
 ### Multi-GPU evaluating
@@ -147,114 +136,41 @@ python eval_ssd.py --config-file configs/ssd300_voc0712.yaml --weights /path/to/
 ```bash
 # for example, evaluate SSD300 with 4 GPUs:
 export NGPUS=4
-python -m torch.distributed.launch --nproc_per_node=$NGPUS eval_ssd.py --config-file configs/ssd300_voc0712.yaml --weights /path/to/trained_ssd300_weights.pth
+python -m torch.distributed.launch --nproc_per_node=$NGPUS test.py --config-file configs/vgg_ssd300_voc0712.yaml
 ```
 
 ## Demo
 
 Predicting image in a folder is simple:
 ```bash
-python demo.py --config-file configs/ssd300_voc0712.yaml --weights path/to/trained/weights.pth --images_dir demo
+python demo.py --config-file configs/vgg_ssd300_voc0712.yaml --images_dir demo
 ```
 Then the predicted images with boxes, scores and label names will saved to `demo/result` folder.
 
-Currently, I provide weights trained as follows:
-
-|         |    Weights   |
-| :-----: | :----------: |
-| SSD300* | [ssd300_voc0712_mAP77.83.pth(100 MB)](https://github.com/lufficc/SSD/releases/download/v1.0.1/ssd300_voc0712_mAP77.83.pth) |
-| SSD512* | [ssd512_voc0712_mAP80.25.pth(104 MB)](https://github.com/lufficc/SSD/releases/download/v1.0.1/ssd512_voc0712_mAP80.25.pth) |
-
-## Performance
+## MODEL ZOO
 ### Origin Paper:
 
 |         | VOC2007 test | coco test-dev2015 |
 | :-----: | :----------: |   :----------:    |
-|  Train  |     07+12    |    trainval35k    |
 | SSD300* |     77.2     |      25.1         |
 | SSD512* |     79.8     |      28.8         |
 
-### Our Implementation:
+### COCO:
 
-|         | VOC2007 test |          COCO 2014 minival               |
-| :-----: | :----------: |   :----------------------------------:   |
-|  Train  |     07+12    |          trainval35k                     |
-| SSD300* |     77.8     |          25.5                            |
-| SSD512* |     80.2     |          -                               |
+| Backbone       | Input Size  |          box AP                  | Model Size |  Download |
+| :------------: | :----------:|   :--------------------------:   | :--------: | :-------: |
+|  VGG16         |     300     |          25.2                    |  274.5MB   |           |
+|  VGG16         |     512     |          xx.x                    |  xxx.xMB   |           |
+|  Mobilenet V2  |     320     |          xx.x                    |  xxx.xMB   |           |
 
-### Details:
+### PASCAL VOC:
 
-<table>
-<thead>
-<tr>
-<th></th>
-<th>VOC2007 test</th>
-<th>COCO 2014 minival</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>SSD300*</td>
-<td><pre><code>mAP: 0.7783
-aeroplane       : 0.8252
-bicycle         : 0.8445
-bird            : 0.7597
-boat            : 0.7102
-bottle          : 0.5275
-bus             : 0.8643
-car             : 0.8660
-cat             : 0.8741
-chair           : 0.6179
-cow             : 0.8279
-diningtable     : 0.7862
-dog             : 0.8519
-horse           : 0.8630
-motorbike       : 0.8515
-person          : 0.8024
-pottedplant     : 0.5079
-sheep           : 0.7685
-sofa            : 0.7926
-train           : 0.8704
-tvmonitor       : 0.7554</code></pre></td>
-<td><pre><code>Average Precision  (AP) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.229
-Average Precision  (AP) @[ IoU=0.50      | area=   all | maxDets=100 ] = 0.388
-Average Precision  (AP) @[ IoU=0.75      | area=   all | maxDets=100 ] = 0.240
-Average Precision  (AP) @[ IoU=0.50:0.95 | area= small | maxDets=100 ] = 0.068
-Average Precision  (AP) @[ IoU=0.50:0.95 | area=medium | maxDets=100 ] = 0.244
-Average Precision  (AP) @[ IoU=0.50:0.95 | area= large | maxDets=100 ] = 0.366
-Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=  1 ] = 0.231
-Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets= 10 ] = 0.336
-Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.368
-Average Recall     (AR) @[ IoU=0.50:0.95 | area= small | maxDets=100 ] = 0.150
-Average Recall     (AR) @[ IoU=0.50:0.95 | area=medium | maxDets=100 ] = 0.404
-Average Recall     (AR) @[ IoU=0.50:0.95 | area= large | maxDets=100 ] = 0.522</code></pre></td>
-</tr>
-<tr>
-<td>SSD512*</td>
-<td><pre><code>mAP: 0.8025
-aeroplane       : 0.8582
-bicycle         : 0.8710
-bird            : 0.8192
-boat            : 0.7410
-bottle          : 0.5894
-bus             : 0.8755
-car             : 0.8856
-cat             : 0.8926
-chair           : 0.6589
-cow             : 0.8634
-diningtable     : 0.7676
-dog             : 0.8707
-horse           : 0.8806
-motorbike       : 0.8512
-person          : 0.8316
-pottedplant     : 0.5238
-sheep           : 0.8191
-sofa            : 0.7915
-train           : 0.8735
-tvmonitor       : 0.7866</code></pre></td>
-<td><pre><code>-</code></pre></td>
-</tr>
-</tbody></table>
+| Backbone         | Input Size  |          mAP                     | Model Size | Download  |
+| :--------------: | :----------:|   :--------------------------:   | :--------: | :-------: |
+|  VGG16           |     300     |          77.6                    |   210.3MB  |           |
+|  VGG16           |     512     |          xx.x                    |   xxx.xMB  |           |
+|  Mobilenet V2    |     320     |          68.8                    |   26.8MB   |           |
+|  EfficientNet-B3 |     300     |          73.9                    |   101.8MB  |           |
 
 ## Troubleshooting
 If you have issues running or compiling this code, we have compiled a list of common issues in [TROUBLESHOOTING.md](TROUBLESHOOTING.md). If your issue is not present there, please feel free to open a new issue.

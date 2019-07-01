@@ -18,5 +18,5 @@ SOLVER:
   GAMMA: 0.1
   BATCH_SIZE: 32
   LR: 1e-3
-TEST:
-  MAX_PER_CLASS: 400
+
+OUTPUT_DIR: 'outputs/vgg_ssd300_coco_trainval35k'

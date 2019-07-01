@@ -1,6 +1,9 @@
 import torch
 import torch.nn as nn
 import torch.nn.init as init
+from .separable_conv import SeparableConv2d
+
+__all__ = ['L2Norm', 'SeparableConv2d']
 
 
 class L2Norm(nn.Module):
