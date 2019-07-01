@@ -159,7 +159,7 @@ Then the predicted images with boxes, scores and label names will saved to `demo
 
 | Backbone       | Input Size  |          box AP                  | Model Size |  Download |
 | :------------: | :----------:|   :--------------------------:   | :--------: | :-------: |
-|  VGG16         |     300     |          25.2                    |  274.5MB   |           |
+|  VGG16         |     300     |          25.2                    |  262MB     | [model](https://github.com/lufficc/SSD/releases/download/1.2/vgg_ssd300_coco_trainval35k.pth)   |
 |  VGG16         |     512     |          xx.x                    |  xxx.xMB   |           |
 |  Mobilenet V2  |     320     |          xx.x                    |  xxx.xMB   |           |
 
@@ -167,10 +167,10 @@ Then the predicted images with boxes, scores and label names will saved to `demo
 
 | Backbone         | Input Size  |          mAP                     | Model Size | Download  |
 | :--------------: | :----------:|   :--------------------------:   | :--------: | :-------: |
-|  VGG16           |     300     |          77.6                    |   210.3MB  |           |
-|  VGG16           |     512     |          xx.x                    |   xxx.xMB  |           |
-|  Mobilenet V2    |     320     |          68.8                    |   26.8MB   |           |
-|  EfficientNet-B3 |     300     |          73.9                    |   101.8MB  |           |
+|  VGG16           |     300     |          77.6                    |   201MB    | [model](https://github.com/lufficc/SSD/releases/download/1.2/vgg_ssd300_voc0712.pth)  |
+|  VGG16           |     512     |          xx.x                    |   xxx.xMB  |            |
+|  Mobilenet V2    |     320     |          68.8                    |   25.5MB   | [model](https://github.com/lufficc/SSD/releases/download/1.2/mobilenet_v2_ssd320_voc0712.pth) |
+|  EfficientNet-B3 |     300     |          73.9                    |   97.1MB   | [model](https://github.com/lufficc/SSD/releases/download/1.2/efficient_net_b3_ssd300_voc0712.pth) |
 
 ## Troubleshooting
 If you have issues running or compiling this code, we have compiled a list of common issues in [TROUBLESHOOTING.md](TROUBLESHOOTING.md). If your issue is not present there, please feel free to open a new issue.
