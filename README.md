@@ -143,9 +143,18 @@ python -m torch.distributed.launch --nproc_per_node=$NGPUS test.py --config-file
 
 Predicting image in a folder is simple:
 ```bash
-python demo.py --config-file configs/vgg_ssd300_voc0712.yaml --images_dir demo
+python demo.py --config-file configs/vgg_ssd300_voc0712.yaml --images_dir demo --ckpt https://github.com/lufficc/SSD/releases/download/1.2/vgg_ssd300_voc0712.pth
 ```
-Then the predicted images with boxes, scores and label names will saved to `demo/result` folder.
+Then it will download and cache `vgg_ssd300_voc0712.pth` automatically and predicted images with boxes, scores and label names will saved to `demo/result` folder by default.
+
+You will see a similar output:
+```text
+(0001/0005) 004101.jpg: objects 01 | load 010ms | inference 033ms | FPS 31
+(0002/0005) 003123.jpg: objects 05 | load 009ms | inference 019ms | FPS 53
+(0003/0005) 000342.jpg: objects 02 | load 009ms | inference 019ms | FPS 51
+(0004/0005) 008591.jpg: objects 02 | load 008ms | inference 020ms | FPS 50
+(0005/0005) 000542.jpg: objects 01 | load 011ms | inference 019ms | FPS 53
+```
 
 ## MODEL ZOO
 ### Origin Paper:
