@@ -23,4 +23,4 @@ SOLVER:
   BATCH_SIZE: 32
   LR: 1e-3
 
-OUTPUT_DIR: 'outputs/mobilenet_v2_ssd_voc0712'
+OUTPUT_DIR: 'outputs/mobilenet_v2_ssd320_voc0712'
