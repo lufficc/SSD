@@ -169,15 +169,15 @@ You will see a similar output:
 | Backbone       | Input Size  |          box AP                  | Model Size |  Download |
 | :------------: | :----------:|   :--------------------------:   | :--------: | :-------: |
 |  VGG16         |     300     |          25.2                    |  262MB     | [model](https://github.com/lufficc/SSD/releases/download/1.2/vgg_ssd300_coco_trainval35k.pth)   |
-|  VGG16         |     512     |          xx.x                    |  xxx.xMB   |           |
-|  Mobilenet V2  |     320     |          xx.x                    |  xxx.xMB   |           |
+|  VGG16         |     512     |          xx.x                    |  xxx.xMB   | coming soon  |
+|  Mobilenet V2  |     320     |          xx.x                    |  xxx.xMB   | coming soon  |
 
 ### PASCAL VOC:
 
 | Backbone         | Input Size  |          mAP                     | Model Size | Download  |
 | :--------------: | :----------:|   :--------------------------:   | :--------: | :-------: |
 |  VGG16           |     300     |          77.6                    |   201MB    | [model](https://github.com/lufficc/SSD/releases/download/1.2/vgg_ssd300_voc0712.pth)  |
-|  VGG16           |     512     |          80.7                    |   207  MB  | [model](https://github.com/lufficc/SSD/releases/download/1.2/vgg_ssd512_voc0712.pth)  |
+|  VGG16           |     512     |          80.7                    |   207MB    | [model](https://github.com/lufficc/SSD/releases/download/1.2/vgg_ssd512_voc0712.pth)  |
 |  Mobilenet V2    |     320     |          68.8                    |   25.5MB   | [model](https://github.com/lufficc/SSD/releases/download/1.2/mobilenet_v2_ssd320_voc0712.pth) |
 |  EfficientNet-B3 |     300     |          73.9                    |   97.1MB   | [model](https://github.com/lufficc/SSD/releases/download/1.2/efficient_net_b3_ssd300_voc0712.pth) |
 
