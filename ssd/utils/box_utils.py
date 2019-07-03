@@ -16,7 +16,7 @@ def convert_locations_to_boxes(locations, priors, center_variance,
         center_variance: a float used to change the scale of center.
         size_variance: a float used to change of scale of size.
     Returns:
-        boxes:  priors: [[center_x, center_y, h, w]]. All the values
+        boxes:  priors: [[center_x, center_y, w, h]]. All the values
             are relative to the image size.
     """
     # priors can have one dimension less.
