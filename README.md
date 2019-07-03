@@ -183,3 +183,14 @@ You will see a similar output:
 
 ## Troubleshooting
 If you have issues running or compiling this code, we have compiled a list of common issues in [TROUBLESHOOTING.md](TROUBLESHOOTING.md). If your issue is not present there, please feel free to open a new issue.
+
+## Citations
+If you use this project in your research, please cite this project.
+```text
+@misc{lufficc2018ssd,
+    author = {Congcong Li},
+    title = {{High quality, fast, modular reference implementation of SSD in PyTorch}},
+    year = {2018},
+    howpublished = {\url{https://github.com/lufficc/SSD}}
+}
+```
