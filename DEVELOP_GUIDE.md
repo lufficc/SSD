@@ -91,10 +91,13 @@ import torch.nn as nn
 
 from ssd.modeling import registry
 from ssd.utils.model_zoo import load_state_dict_from_url
+
+
 class MyBackbone(nn.Module):
     def __init__(self, cfg):
         super().__init__()
         ...
+
     def forward(self, x):
         features = []
         
