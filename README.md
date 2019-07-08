@@ -5,7 +5,7 @@ This repository implements [SSD (Single Shot MultiBox Detector)](https://arxiv.o
 
 <div align="center">
   <img src="figures/004545.jpg" width="500px" />
-  <p>Example SSD output (ssd300_voc0712).</p>
+  <p>Example SSD output (vgg_ssd300_voc0712).</p>
 </div>
 
 | Losses        | Learning rate | Metrics |
