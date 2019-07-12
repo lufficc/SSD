@@ -54,8 +54,7 @@ python setup.py build_ext install
 ```
 
 ### Build
-
-NMS build is not necessary, as we provide a python-like nms, but is very slower than build-version.
+If your torchvision >= 0.3.0, nms build is not needed! We also provide a python-like nms, but is very slower than build-version.
 ```bash
 # For faster inference you need to build nms, this is needed when evaluating. Only training doesn't need this.
 cd ext
@@ -176,7 +175,7 @@ You will see a similar output:
 
 | Backbone         | Input Size  |          mAP                     | Model Size | Download  |
 | :--------------: | :----------:|   :--------------------------:   | :--------: | :-------: |
-|  VGG16           |     300     |          77.6                    |   201MB    | [model](https://github.com/lufficc/SSD/releases/download/1.2/vgg_ssd300_voc0712.pth)  |
+|  VGG16           |     300     |          77.7                    |   201MB    | [model](https://github.com/lufficc/SSD/releases/download/1.2/vgg_ssd300_voc0712.pth)  |
 |  VGG16           |     512     |          80.7                    |   207MB    | [model](https://github.com/lufficc/SSD/releases/download/1.2/vgg_ssd512_voc0712.pth)  |
 |  Mobilenet V2    |     320     |          68.8                    |   25.5MB   | [model](https://github.com/lufficc/SSD/releases/download/1.2/mobilenet_v2_ssd320_voc0712.pth) |
 |  EfficientNet-B3 |     300     |          73.9                    |   97.1MB   | [model](https://github.com/lufficc/SSD/releases/download/1.2/efficient_net_b3_ssd300_voc0712.pth) |
