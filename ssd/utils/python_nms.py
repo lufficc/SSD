@@ -24,7 +24,7 @@ def python_nms(boxes, scores, nms_thresh):
     y1 = boxes[:, 1]
     x2 = boxes[:, 2]
     y2 = boxes[:, 3]
-    areas = (x2 - x1 + 1) * (y2 - y1 + 1)
+    areas = (x2 - x1) * (y2 - y1)
     order = np.argsort(scores)[::-1]
     num_detections = boxes.shape[0]
     suppressed = np.zeros((num_detections,), dtype=np.bool)
@@ -47,8 +47,8 @@ def python_nms(boxes, scores, nms_thresh):
             yy1 = max(iy1, y1[j])
             xx2 = min(ix2, x2[j])
             yy2 = min(iy2, y2[j])
-            w = max(0, xx2 - xx1 + 1)
-            h = max(0, yy2 - yy1 + 1)
+            w = max(0, xx2 - xx1)
+            h = max(0, yy2 - yy1)
 
             inter = w * h
             ovr = inter / (iarea + areas[j] - inter)

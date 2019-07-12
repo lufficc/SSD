@@ -20,8 +20,7 @@ def boxes_nms(boxes, scores, nms_thresh, max_count=-1):
     """ Performs non-maximum suppression, run on GPU or CPU according to
     boxes's device.
     Args:
-        boxes(Tensor): `xyxy` mode boxes, use absolute coordinates(not support relative coordinates),
-            shape is (n, 4)
+        boxes(Tensor): `xyxy` mode boxes, use absolute coordinates(or relative coordinates), shape is (n, 4)
         scores(Tensor): scores, shape is (n, )
         nms_thresh(float): thresh
         max_count (int): if > 0, then only the top max_proposals are kept  after non-maximum suppression
