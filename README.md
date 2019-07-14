@@ -169,7 +169,6 @@ You will see a similar output:
 | :------------: | :----------:|   :--------------------------:   | :--------: | :-------: |
 |  VGG16         |     300     |          25.2                    |  262MB     | [model](https://github.com/lufficc/SSD/releases/download/1.2/vgg_ssd300_coco_trainval35k.pth)   |
 |  VGG16         |     512     |          29.0                    |  275MB     | [model](https://github.com/lufficc/SSD/releases/download/1.2/vgg_ssd512_coco_trainval35k.pth)   |
-|  Mobilenet V2  |     320     |          xx.x                    |  xxx.xMB   | coming soon  |
 
 ### PASCAL VOC:
 
