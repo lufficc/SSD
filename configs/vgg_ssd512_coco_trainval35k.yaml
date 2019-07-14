@@ -15,8 +15,8 @@ DATASETS:
   TRAIN: ("coco_2014_train", "coco_2014_valminusminival")
   TEST: ("coco_2014_minival", )
 SOLVER:
-  MAX_ITER: 400000
-  LR_STEPS: [280000, 360000]
+  MAX_ITER: 520000
+  LR_STEPS: [360000, 480000]
   GAMMA: 0.1
   BATCH_SIZE: 24
   LR: 1e-3
