@@ -1,6 +1,7 @@
 MODEL:
   NUM_CLASSES: 21
-  BOX_PREDICTOR: 'SSDLiteBoxPredictor'
+  BOX_HEAD:
+    PREDICTOR: 'SSDLiteBoxPredictor'
   BACKBONE:
     NAME: 'mobilenet_v2'
     OUT_CHANNELS: (96, 1280, 512, 256, 256, 64)

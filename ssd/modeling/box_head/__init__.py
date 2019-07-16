@@ -5,5 +5,4 @@ __all__ = ['build_box_head', 'SSDBoxHead']
 
 
 def build_box_head(cfg):
-    # TODO: make it more general
-    return registry.BOX_HEADS['SSDBoxHead'](cfg)
+    return registry.BOX_HEADS[cfg.MODEL.BOX_HEAD.NAME](cfg)

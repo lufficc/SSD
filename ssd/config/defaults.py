@@ -4,7 +4,6 @@ _C = CN()
 
 _C.MODEL = CN()
 _C.MODEL.META_ARCHITECTURE = 'SSDDetector'
-_C.MODEL.BOX_PREDICTOR = 'SSDBoxPredictor'
 _C.MODEL.DEVICE = "cuda"
 # match default boxes to any ground truth with jaccard overlap higher than a threshold (0.5)
 _C.MODEL.THRESHOLD = 0.5
@@ -35,6 +34,13 @@ _C.MODEL.PRIORS.ASPECT_RATIOS = [[2], [2, 3], [2, 3], [2, 3], [2], [2]]
 # #boxes = 2 + #ratio * 2
 _C.MODEL.PRIORS.BOXES_PER_LOCATION = [4, 6, 6, 6, 4, 4]  # number of boxes per feature map location
 _C.MODEL.PRIORS.CLIP = True
+
+# -----------------------------------------------------------------------------
+# Box Head
+# -----------------------------------------------------------------------------
+_C.MODEL.BOX_HEAD = CN()
+_C.MODEL.BOX_HEAD.NAME = 'SSDBoxHead'
+_C.MODEL.BOX_HEAD.PREDICTOR = 'SSDBoxPredictor'
 
 # -----------------------------------------------------------------------------
 # INPUT
