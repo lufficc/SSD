@@ -39,7 +39,7 @@ def make_data_loader(cfg, is_train=True, distributed=False, max_iter=None, start
 
     for dataset in datasets:
         if distributed:
-            sampler = samplers.DistributedSampler(dataset, shuffle=shuffle)
+            sampler = torch.utils.data.distributed.DistributedSampler(dataset, shuffle=shuffle)
         elif shuffle:
             sampler = torch.utils.data.RandomSampler(dataset)
         else:

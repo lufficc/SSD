@@ -13,6 +13,7 @@ from ssd.modeling.detector import build_detection_model
 from ssd.solver.build import make_optimizer, make_lr_scheduler
 from ssd.utils import dist_util, mkdir
 from ssd.utils.checkpoint import CheckPointer
+from ssd.utils.dist_util import init_distributed_mode
 from ssd.utils.dist_util import synchronize
 from ssd.utils.logger import setup_logger
 from ssd.utils.misc import str2bool
@@ -23,8 +24,9 @@ def train(cfg, args):
     model = build_detection_model(cfg)
     device = torch.device(cfg.MODEL.DEVICE)
     model.to(device)
+
     if args.distributed:
-        model = torch.nn.parallel.DistributedDataParallel(model, device_ids=[args.local_rank], output_device=args.local_rank)
+        model = torch.nn.parallel.DistributedDataParallel(model, device_ids=[args.gpu])
 
     lr = cfg.SOLVER.LR * args.num_gpus  # scale by num gpus
     optimizer = make_optimizer(cfg, model, lr)
@@ -43,7 +45,6 @@ def train(cfg, args):
 
     model = do_train(cfg, model, train_loader, optimizer, scheduler, checkpointer, device, arguments, args)
     return model
-
 
 def main():
     parser = argparse.ArgumentParser(description='Single Shot MultiBox Detector Training With PyTorch')
@@ -81,9 +82,8 @@ def main():
         # find the best algorithm to use for your hardware.
         torch.backends.cudnn.benchmark = True
     if args.distributed:
-        torch.cuda.set_device(args.local_rank)
-        torch.distributed.init_process_group(backend="nccl", init_method="env://")
-        synchronize()
+        args.dist_url = "env://"
+        init_distributed_mode(args)
 
     cfg.merge_from_file(args.config_file)
     cfg.merge_from_list(args.opts)
