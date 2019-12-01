@@ -31,8 +31,8 @@ def add_extras(cfgs):
     extras = nn.ModuleList()
     for cfg in cfgs:
         extra = []
-        for prams in cfg:
-            in_channels, out_channels, kernel_size, stride, padding = prams
+        for params in cfg:
+            in_channels, out_channels, kernel_size, stride, padding = params
             extra.append(nn.Conv2d(in_channels, out_channels, kernel_size, stride, padding))
             extra.append(nn.ReLU())
         extras.append(nn.Sequential(*extra))
