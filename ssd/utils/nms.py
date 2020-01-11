@@ -1,3 +1,4 @@
+import sys
 import warnings
 import torchvision
 
@@ -10,8 +11,9 @@ except ImportError:
     if torchvision.__version__ >= '0.3.0':
         _nms = torchvision.ops.nms
     else:
-        warnings.warn('No NMS is available. Please upgrade torchvision or compile c++ NMS '
+        warnings.warn('No NMS is available. Please upgrade torchvision to 0.3.0+ or compile c++ NMS '
                       'using `cd ext & python build.py build_ext develop`')
+        sys.exit(-1)
 
 
 def boxes_nms(boxes, scores, nms_thresh, max_count=-1):
