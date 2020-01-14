@@ -4,6 +4,9 @@ __pycache__
 *.so
 ext/build/
 ext/torch_extension.egg-info/
+dist/
+*.egg-info
+
 # pytorch/python/numpy formats
 *.pth
 *.pkl
