@@ -74,7 +74,6 @@ def do_train(cfg, model,
     for iteration, (images, targets, _) in enumerate(data_loader, start_iter):
         iteration = iteration + 1
         arguments["iteration"] = iteration
-        scheduler.step()
 
         images = images.to(device)
         targets = targets.to(device)
@@ -89,6 +88,7 @@ def do_train(cfg, model,
         optimizer.zero_grad()
         loss.backward()
         optimizer.step()
+        scheduler.step()
 
         batch_time = time.time() - end
         end = time.time()
