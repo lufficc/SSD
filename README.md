@@ -39,27 +39,14 @@ This repository implements [SSD (Single Shot MultiBox Detector)](https://arxiv.o
 ```bash
 git clone https://github.com/lufficc/SSD.git
 cd SSD
-#Required packages
-pip install torch torchvision yacs tqdm opencv-python vizer
+# Required packages: torch torchvision yacs tqdm opencv-python vizer
+pip install -r requirements.txt
 
-# Optional packages
-# If you want visualize loss curve. Default is enabled. Disable by using --use_tensorboard 0 when training.
-pip install tensorboardX
+# Done! That's ALL! No BUILD! No bothering SETUP!
 
-# If you train coco dataset, must install cocoapi.
-cd ~/github
-git clone https://github.com/cocodataset/cocoapi.git
-cd cocoapi/PythonAPI
-python setup.py build_ext install
+# It's recommended to install the latest release of torch and torchvision.
 ```
 
-### Build
-If your torchvision >= 0.3.0, nms build is not needed! We also provide a python-like nms, but is very slower than build-version.
-```bash
-# For faster inference you need to build nms, this is needed when evaluating. Only training doesn't need this.
-cd ext
-python build.py build_ext develop
-```
 
 ## Train
 

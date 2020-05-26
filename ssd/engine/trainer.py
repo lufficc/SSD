@@ -61,9 +61,11 @@ def do_train(cfg, model,
     model.train()
     save_to_disk = dist_util.get_rank() == 0
     if args.use_tensorboard and save_to_disk:
-        import tensorboardX
-
-        summary_writer = tensorboardX.SummaryWriter(log_dir=os.path.join(cfg.OUTPUT_DIR, 'tf_logs'))
+        try:
+            from torch.utils.tensorboard import SummaryWriter
+        except ImportError:
+            from tensorboardX import SummaryWriter
+        summary_writer = SummaryWriter(log_dir=os.path.join(cfg.OUTPUT_DIR, 'tf_logs'))
     else:
         summary_writer = None
 

@@ -8,8 +8,8 @@ setup(
     version="1.2.0",
     packages=find_packages(exclude=['ext']),
     install_requires=[
-        "torch~=1.0",
-        "torchvision~=0.3",
+        "torch>=1.3",
+        "torchvision>=0.3",
         "opencv-python~=4.0",
         "yacs==0.1.6",
         "Vizer~=0.1.4",
