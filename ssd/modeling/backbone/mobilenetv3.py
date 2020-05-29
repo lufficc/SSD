@@ -175,10 +175,10 @@ class MobileNetV3(nn.Module):
         layers.append(conv_1x1_bn(input_channel, exp_size))
         self.features = nn.Sequential(*layers)
         self.extras = nn.ModuleList([
-            InvertedResidual(960, _make_divisible(960 * 0.2, 8) , 512, 1, 2, True, True),
-            InvertedResidual(512, _make_divisible(512 * 0.25, 8), 256, 1, 2, True, True),
-            InvertedResidual(256, _make_divisible(256 * 0.5, 8) , 256, 1, 2, True, True),
-            InvertedResidual(256, _make_divisible(256 * 0.25, 8) , 64, 1, 2, True, True),
+            InvertedResidual(960, _make_divisible(960 * 0.2, 8) , 512, 3, 2, True, True),
+            InvertedResidual(512, _make_divisible(512 * 0.25, 8), 256, 3, 2, True, True),
+            InvertedResidual(256, _make_divisible(256 * 0.5, 8) , 256, 3, 2, True, True),
+            InvertedResidual(256, _make_divisible(256 * 0.25, 8) , 64, 3, 2, True, True),
         ])
 
         self.reset_parameters()
