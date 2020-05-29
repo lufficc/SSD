@@ -6,7 +6,7 @@ arXiv preprint arXiv:1905.02244.
 
 
 @ Credit from https://github.com/d-li14/mobilenetv3.pytorch
-@ Modiflied by Chakkrit Termritthikun (https://github.com/chakkritte)
+@ Modified by Chakkrit Termritthikun (https://github.com/chakkritte)
 
 """
 
@@ -183,7 +183,6 @@ class MobileNetV3(nn.Module):
 
         self.reset_parameters()
 
-
     def forward(self, x):
         features = []
         for i in range(13):
@@ -200,7 +199,6 @@ class MobileNetV3(nn.Module):
 
         return tuple(features)
 
-    
     def reset_parameters(self):
         for m in self.modules():
             if isinstance(m, nn.Conv2d):
