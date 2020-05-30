@@ -76,7 +76,7 @@ class MultiBoxLoss(nn.Module):
         if self.losstype == 'SmoothL1':
             smooth_l1_loss = F.smooth_l1_loss(predicted_locations, gt_locations, reduction='sum')
         else:
-            giou_priors = priors.data.unsqueeze(0).expand_as(predicted_locations)
+            giou_priors = priors.data.unsqueeze(0).expand_as(confidence)
             smooth_l1_loss = self.gious(predicted_locations, gt_locations, giou_priors[pos_idx].view(-1, 4))
 
         num_pos = gt_locations.size(0)
