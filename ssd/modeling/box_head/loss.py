@@ -57,7 +57,7 @@ class MultiBoxLoss(nn.Module):
             labels (batch_size, num_priors): real labels of all the priors.
             gt_locations (batch_size, num_priors, 4): real boxes corresponding all the priors.
         """
-        priors = predicted_locations[1:]
+        priors = predicted_locations[0:]
         priors = priors[:confidence.size(1), :]
         
         num_classes = confidence.size(2)
