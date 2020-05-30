@@ -15,7 +15,7 @@ class SSDBoxHead(nn.Module):
         super().__init__()
         self.cfg = cfg
         self.predictor = make_box_predictor(cfg)
-        self.loss_evaluator = MultiBoxLoss(neg_pos_ratio=cfg.MODEL.NEG_POS_RATIO, losstype=cfg.MODEL.LOSS)
+        self.loss_evaluator = MultiBoxLoss(neg_pos_ratio=cfg.MODEL.NEG_POS_RATIO)
         self.post_processor = PostProcessor(cfg)
         self.priors = None
 
