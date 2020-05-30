@@ -12,6 +12,8 @@ _C.MODEL.NUM_CLASSES = 21
 _C.MODEL.NEG_POS_RATIO = 3
 _C.MODEL.CENTER_VARIANCE = 0.1
 _C.MODEL.SIZE_VARIANCE = 0.2
+# Loss
+_C.MODEL.LOSS = "SmoothL1"
 
 # ---------------------------------------------------------------------------- #
 # Backbone
