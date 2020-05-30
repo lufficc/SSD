@@ -6,7 +6,7 @@ from ssd.utils import box_utils
 
 class IouLoss(nn.Module):
 
-    def __init__(self,pred_mode = 'Center',size_sum=True,variances=None,losstype='Giou'):
+    def __init__(self,pred_mode = 'Center',size_sum=True,variances=[0.1, 0.2],losstype='Giou'):
         super(IouLoss, self).__init__()
         self.size_sum = size_sum
         self.pred_mode = pred_mode
@@ -46,7 +46,7 @@ class MultiBoxLoss(nn.Module):
         super(MultiBoxLoss, self).__init__()
         self.neg_pos_ratio = neg_pos_ratio
         self.losstype = losstype
-        self.gious = IouLoss(pred_mode = 'Center',size_sum=True,variances=self.variance, losstype=losstype)
+        self.gious = IouLoss(pred_mode = 'Center',size_sum=True, losstype=losstype)
 
     def forward(self, confidence, predicted_locations, labels, gt_locations):
         """Compute classification loss and smooth l1 loss.
