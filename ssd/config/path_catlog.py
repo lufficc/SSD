@@ -44,13 +44,13 @@ class DatasetCatalog:
             "data_dir": "val2014",
             "ann_file": "annotations/instances_minival2014.json"
         },
-        'coco_2014_train': {
-            "data_dir": "train2014",
-            "ann_file": "annotations/instances_train2014.json"
+        'coco_2017_train': {
+            "data_dir": "train2017",
+            "ann_file": "annotations/instances_train2017.json"
         },
-        'coco_2014_val': {
-            "data_dir": "val2014",
-            "ann_file": "annotations/instances_val2014.json"
+        'coco_2017_val': {
+            "data_dir": "val2017",
+            "ann_file": "annotations/instances_val2017.json"
         },
     }
 
