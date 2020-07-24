@@ -13,7 +13,7 @@ import torch
 import torch.nn as nn  # for nn layer generation and combinations
 # We will be using the resnet 50 model for our implementation
 from torchvision.models.resnet import resnet50
-
+from ssd.modeling import registry
 
 class ResNet(nn.Module):
     # The resnet backbone is to be used as a feature provider.
@@ -175,7 +175,7 @@ class resnet50_SSD300(nn.Module):
 
         return detection_feed
 
-@registry.BACKBONES.register('resnet50')
+@registry.BACKBONES.register('resnet50_SSD300')
 def resnet50(cfg, pretrained=True):
     model = resnet50_SSD300(cfg)
     # model_url = 'you_model_url'

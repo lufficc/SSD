@@ -25,3 +25,4 @@ dist/
 # Pycharm editor settings
 .idea
 .DS_Store
+datasets/

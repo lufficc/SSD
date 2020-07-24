@@ -1,7 +1,7 @@
 MODEL:
   NUM_CLASSES: 81
   BACKBONE:
-    NAME: 'resnet50-ssd300'
+    NAME: 'resnet50_SSD300'
     OUT_CHANNELS: (1024, 512, 512, 256, 256, 256)
   PRIORS:
     FEATURE_MAPS: [38, 19, 10, 5, 3, 1]
