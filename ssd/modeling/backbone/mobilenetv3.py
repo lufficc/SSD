@@ -64,10 +64,10 @@ class SELayer(nn.Module):
         super(SELayer, self).__init__()
         self.avg_pool = nn.AdaptiveAvgPool2d(1)
         self.fc = nn.Sequential(
-                nn.Linear(channel, _make_divisible(channel // reduction, 8)),
-                nn.ReLU(inplace=True),
-                nn.Linear(_make_divisible(channel // reduction, 8), channel),
-                h_sigmoid()
+            nn.Linear(channel, _make_divisible(channel // reduction, 8)),
+            nn.ReLU(inplace=True),
+            nn.Linear(_make_divisible(channel // reduction, 8), channel),
+            h_sigmoid()
         )
 
     def forward(self, x):
@@ -141,28 +141,28 @@ class MobileNetV3(nn.Module):
         super(MobileNetV3, self).__init__()
         # setting of inverted residual blocks
         self.cfgs = [
-        # k, t, c, SE, HS, s 
-        [3,   1,  16, 0, 0, 1],
-        [3,   4,  24, 0, 0, 2],
-        [3,   3,  24, 0, 0, 1],
-        [5,   3,  40, 1, 0, 2],
-        [5,   3,  40, 1, 0, 1],
-        [5,   3,  40, 1, 0, 1],
-        [3,   6,  80, 0, 1, 2],
-        [3, 2.5,  80, 0, 1, 1],
-        [3, 2.3,  80, 0, 1, 1],
-        [3, 2.3,  80, 0, 1, 1],
-        [3,   6, 112, 1, 1, 1],
-        [3,   6, 112, 1, 1, 1],
-        [5,   6, 160, 1, 1, 2],
-        [5,   6, 160, 1, 1, 1],
-        [5,   6, 160, 1, 1, 1]]
-        
+            # k, t, c, SE, HS, s
+            [3, 1, 16, 0, 0, 1],
+            [3, 4, 24, 0, 0, 2],
+            [3, 3, 24, 0, 0, 1],
+            [5, 3, 40, 1, 0, 2],
+            [5, 3, 40, 1, 0, 1],
+            [5, 3, 40, 1, 0, 1],
+            [3, 6, 80, 0, 1, 2],
+            [3, 2.5, 80, 0, 1, 1],
+            [3, 2.3, 80, 0, 1, 1],
+            [3, 2.3, 80, 0, 1, 1],
+            [3, 6, 112, 1, 1, 1],
+            [3, 6, 112, 1, 1, 1],
+            [5, 6, 160, 1, 1, 2],
+            [5, 6, 160, 1, 1, 1],
+            [5, 6, 160, 1, 1, 1]]
+
         assert mode in ['large', 'small']
 
         # building first layer
         input_channel = _make_divisible(16 * width_mult, 8)
-        
+
         layers = [conv_3x3_bn(3, input_channel, 2)]
         # building inverted residual blocks
         block = InvertedResidual
@@ -175,10 +175,10 @@ class MobileNetV3(nn.Module):
         layers.append(conv_1x1_bn(input_channel, exp_size))
         self.features = nn.Sequential(*layers)
         self.extras = nn.ModuleList([
-            InvertedResidual(960, _make_divisible(960 * 0.2, 8) , 512, 3, 2, True, True),
+            InvertedResidual(960, _make_divisible(960 * 0.2, 8), 512, 3, 2, True, True),
             InvertedResidual(512, _make_divisible(512 * 0.25, 8), 256, 3, 2, True, True),
-            InvertedResidual(256, _make_divisible(256 * 0.5, 8) , 256, 3, 2, True, True),
-            InvertedResidual(256, _make_divisible(256 * 0.25, 8) , 64, 3, 2, True, True),
+            InvertedResidual(256, _make_divisible(256 * 0.5, 8), 256, 3, 2, True, True),
+            InvertedResidual(256, _make_divisible(256 * 0.25, 8), 64, 3, 2, True, True),
         ])
 
         self.reset_parameters()
@@ -213,6 +213,7 @@ class MobileNetV3(nn.Module):
                 n = m.weight.size(1)
                 m.weight.data.normal_(0, 0.01)
                 m.bias.data.zero_()
+
 
 @registry.BACKBONES.register('mobilenet_v3')
 def mobilenet_v3(cfg, pretrained=True):
