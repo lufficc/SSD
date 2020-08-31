@@ -98,21 +98,36 @@ def do_train(cfg, model,
         if iteration % args.log_step == 0:
             eta_seconds = meters.time.global_avg * (max_iter - iteration)
             eta_string = str(datetime.timedelta(seconds=int(eta_seconds)))
-            logger.info(
-                meters.delimiter.join([
-                    "iter: {iter:06d}",
-                    "lr: {lr:.5f}",
-                    '{meters}',
-                    "eta: {eta}",
-                    'mem: {mem}M',
-                ]).format(
-                    iter=iteration,
-                    lr=optimizer.param_groups[0]['lr'],
-                    meters=str(meters),
-                    eta=eta_string,
-                    mem=round(torch.cuda.max_memory_allocated() / 1024.0 / 1024.0),
+            if device == "cuda":
+                logger.info(
+                    meters.delimiter.join([
+                        "iter: {iter:06d}",
+                        "lr: {lr:.5f}",
+                        '{meters}',
+                        "eta: {eta}",
+                        'mem: {mem}M',
+                    ]).format(
+                        iter=iteration,
+                        lr=optimizer.param_groups[0]['lr'],
+                        meters=str(meters),
+                        eta=eta_string,
+                        mem=round(torch.cuda.max_memory_allocated() / 1024.0 / 1024.0),
+                    )
                 )
-            )
+            else:
+                logger.info(
+                    meters.delimiter.join([
+                        "iter: {iter:06d}",
+                        "lr: {lr:.5f}",
+                        '{meters}',
+                        "eta: {eta}",
+                    ]).format(
+                        iter=iteration,
+                        lr=optimizer.param_groups[0]['lr'],
+                        meters=str(meters),
+                        eta=eta_string,
+                    )
+                )
             if summary_writer:
                 global_step = iteration
                 summary_writer.add_scalar('losses/total_loss', losses_reduced, global_step=global_step)
