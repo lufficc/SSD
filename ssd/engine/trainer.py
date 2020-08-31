@@ -98,7 +98,7 @@ def do_train(cfg, model,
         if iteration % args.log_step == 0:
             eta_seconds = meters.time.global_avg * (max_iter - iteration)
             eta_string = str(datetime.timedelta(seconds=int(eta_seconds)))
-            if device=="cuda":
+            if device == "cuda":
                 logger.info(
                     meters.delimiter.join([
                         "iter: {iter:06d}",
