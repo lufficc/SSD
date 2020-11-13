@@ -44,7 +44,7 @@ def compute_on_dataset(model, data_loader, device):
 
             outputs = [o.to(cpu_device) for o in outputs]
         results_dict.update(
-            {img_id: result for img_id, result in zip(image_ids, outputs)}
+            {int(img_id): result for img_id, result in zip(image_ids, outputs)}
         )
     return results_dict
 

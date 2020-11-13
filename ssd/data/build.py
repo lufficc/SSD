@@ -33,7 +33,7 @@ def make_data_loader(cfg, is_train=True, distributed=False, max_iter=None, start
     dataset_list = cfg.DATASETS.TRAIN if is_train else cfg.DATASETS.TEST
     datasets = build_dataset(dataset_list, transform=train_transform, target_transform=target_transform, is_train=is_train)
 
-    shuffle = is_train or distributed
+    shuffle = is_train
 
     data_loaders = []
 
