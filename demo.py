@@ -26,6 +26,7 @@ def run_demo(cfg, ckpt, score_threshold, images_dir, output_dir, dataset_type):
     else:
         raise NotImplementedError('Not implemented now.')
     device = torch.device(cfg.MODEL.DEVICE)
+    device = "cpu" if not torch.cuda.is_available() else device
 
     model = build_detection_model(cfg)
     model = model.to(device)
