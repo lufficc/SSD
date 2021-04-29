@@ -2,5 +2,6 @@ torch>=1.3
 torchvision>=0.3
 yacs
 tqdm
+onnxruntime
 opencv-python
 vizer
