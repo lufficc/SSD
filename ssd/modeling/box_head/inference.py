@@ -4,14 +4,16 @@ from ssd.structures.container import Container
 from ssd.utils.nms import batched_nms
 
 
-class PostProcessor:
+class PostProcessorBase:
     def __init__(self, cfg):
-        super().__init__()
         self.cfg = cfg
         self.width = cfg.INPUT.IMAGE_SIZE
         self.height = cfg.INPUT.IMAGE_SIZE
 
     def __call__(self, detections):
+        raise NotImplementedError("PostProcessorBase cannot be called by default. A new class must inherit from this")
+
+    def _call(self, detections):
         batches_scores, batches_boxes = detections
         device = batches_scores.device
         batch_size = batches_scores.size(0)
@@ -47,8 +49,28 @@ class PostProcessor:
             keep = keep[:self.cfg.TEST.MAX_PER_IMAGE]
             boxes, scores, labels = boxes[keep], scores[keep], labels[keep]
 
+            results.append([boxes, scores, labels])
+        return results
+
+
+class PostProcessor(PostProcessorBase):
+    def __init__(self, cfg):
+        super(PostProcessor, self).__init__(cfg)
+
+    def __call__(self, detections):
+        uncontainered_results = self._call(detections)
+        results = []
+        for boxes, scores, labels in uncontainered_results:
             container = Container(boxes=boxes, labels=labels, scores=scores)
             container.img_width = self.width
             container.img_height = self.height
             results.append(container)
         return results
+
+
+class PostProcessorOnnx(PostProcessorBase):
+    def __init__(self, cfg):
+        super(PostProcessorOnnx, self).__init__(cfg)
+
+    def __call__(self, detections):
+        return self._call(detections)
