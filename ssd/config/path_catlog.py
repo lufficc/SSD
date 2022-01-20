@@ -4,6 +4,22 @@ import os
 class DatasetCatalog:
     DATA_DIR = 'datasets'
     DATASETS = {
+         'mahjong_train': {
+            "data_dir": "Mahjong",
+            "split": "train"
+        },
+        'mahjong_val': {
+            "data_dir": "Mahjong",
+            "split": "val"
+        },
+        'mahjong_trainval': {
+            "data_dir": "Mahjong",
+            "split": "trainval"
+        },
+        'mahjong_test': {
+            "data_dir": "Mahjong",
+            "split": "test"
+        },
         'voc_2007_train': {
             "data_dir": "VOC2007",
             "split": "train"
@@ -78,5 +94,15 @@ class DatasetCatalog:
                 ann_file=os.path.join(coco_root, attrs["ann_file"]),
             )
             return dict(factory="COCODataset", args=args)
+        elif "mahjong" in name;
+            voc_root = DatasetCatalog.DATA_DIR
+            if 'VOC_ROOT' in os.environ:
+                voc_root = os.environ['VOC_ROOT']
+            attrs = DatasetCatalog.DATASETS[name]
+            args = dict(
+                data_dir=os.path.join(voc_root, attrs["data_dir"]),
+                split=attrs["split"],
+            )
+            return dict(factory="VOCDataset", args=args)
 
         raise RuntimeError("Dataset not available: {}".format(name))

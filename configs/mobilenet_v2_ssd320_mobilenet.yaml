@@ -1,5 +1,5 @@
 MODEL:
-  NUM_CLASSES: 21
+  NUM_CLASSES: 43
   BOX_HEAD:
     PREDICTOR: 'SSDLiteBoxPredictor'
   BACKBONE:
@@ -15,13 +15,15 @@ MODEL:
 INPUT:
   IMAGE_SIZE: 320
 DATASETS:
-  TRAIN: ("voc_2007_trainval", "voc_2012_trainval")
-  TEST: ("voc_2007_test", )
+  TRAIN: ("mahjong_trainval", )
+  TEST: ("mahjong_test", )
+DATA_LOADER:
+  NUM_WORKERS: 4
 SOLVER:
-  MAX_ITER: 120000
-  LR_STEPS: [80000, 100000]
+  MAX_ITER: 60000
+  LR_STEPS: [10000, 20000, 40000]
   GAMMA: 0.1
   BATCH_SIZE: 32
   LR: 1e-3
 
-OUTPUT_DIR: 'outputs/mobilenet_v2_ssd320_voc0712'
+OUTPUT_DIR: 'outputs/mobilenet_v2_ssd320_mahjong'
