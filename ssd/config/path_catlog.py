@@ -94,7 +94,7 @@ class DatasetCatalog:
                 ann_file=os.path.join(coco_root, attrs["ann_file"]),
             )
             return dict(factory="COCODataset", args=args)
-        elif "mahjong" in name;
+        elif "mahjong" in name:
             voc_root = DatasetCatalog.DATA_DIR
             if 'VOC_ROOT' in os.environ:
                 voc_root = os.environ['VOC_ROOT']

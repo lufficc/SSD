@@ -7,7 +7,6 @@ from .coco import COCODataset
 _DATASETS = {
     'VOCDataset': VOCDataset,
     'COCODataset': COCODataset,
-    ''
 }
 
 

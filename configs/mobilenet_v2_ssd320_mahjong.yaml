@@ -23,7 +23,9 @@ SOLVER:
   MAX_ITER: 60000
   LR_STEPS: [10000, 20000, 40000]
   GAMMA: 0.1
-  BATCH_SIZE: 32
-  LR: 1e-3
+  BATCH_SIZE: 16
+  LR: 1e-2
+TEST:
+    BATCH_SIZE: 16
 
 OUTPUT_DIR: 'outputs/mobilenet_v2_ssd320_mahjong'

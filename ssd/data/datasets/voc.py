@@ -8,13 +8,27 @@ from ssd.structures.container import Container
 
 
 class VOCDataset(torch.utils.data.Dataset):
-    class_names = ('__background__',
-                   'aeroplane', 'bicycle', 'bird', 'boat',
-                   'bottle', 'bus', 'car', 'cat', 'chair',
-                   'cow', 'diningtable', 'dog', 'horse',
-                   'motorbike', 'person', 'pottedplant',
-                   'sheep', 'sofa', 'train', 'tvmonitor')
-
+    # class_names = ('__background__',
+    #                'aeroplane', 'bicycle', 'bird', 'boat',
+    #                'bottle', 'bus', 'car', 'cat', 'chair',
+    #                'cow', 'diningtable', 'dog', 'horse',
+    #                'motorbike', 'person', 'pottedplant',
+    #                'sheep', 'sofa', 'train', 'tvmonitor')
+    class_names = (
+        '__background__',
+        'bamboo-1', 'bamboo-2', 'bamboo-3', 'bamboo-4',
+        'bamboo-5', 'bamboo-6', 'bamboo-7', 'bamboo-8', 'bamboo-9',
+        'bonus-autumn', 'bonus-bamboo', 'bonus-chrysanthemum',
+        'bonus-orchid', 'bonus-plum', 'bonus-spring', 'bonus-summer',
+        'bonus-winter', 'characters-1', 'characters-2', 'characters-3',
+        'characters-4', 'characters-5', 'characters-6', 'characters-7',
+        'characters-8', 'characters-9', 'dots-1', 'dots-2', 'dots-3',
+        'dots-4', 'dots-5', 'dots-6', 'dots-7', 'dots-8', 'dots-9',
+        'honors-east', 'honors-green', 'honors-north', 'honors-red',
+        'honors-south', 'honors-west', 'honors-white'
+    )
+    
+    
     def __init__(self, data_dir, split, transform=None, target_transform=None, keep_difficult=False):
         """Dataset for VOC data.
         Args:
