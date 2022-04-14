@@ -4,7 +4,9 @@ import warnings
 import torch
 import torchvision
 
-if torchvision.__version__ >= '0.3.0':
+from packaging import version
+
+if version.parse(torchvision.__version__) >= version.parse('0.3.0'):
     _nms = torchvision.ops.nms
 else:
     warnings.warn('No NMS is available. Please upgrade torchvision to 0.3.0+')
